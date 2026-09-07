@@ -363,3 +363,27 @@ fun parsePerTestSnapshot(raw: String): PerTestSnapshot? {
     val ranAtMs = obj.longOrNull("ranAtMs") ?: return null
     return PerTestSnapshot(perTest, warnings, targets, ranAtMs)
 }
+
+/** [PerTestSnapshot]'s `mutation-current.json` counterpart - same shape, same reasoning, same independent-restore contract. */
+data class MutationSnapshot(
+    val mutation: MutationBlock,
+    val warnings: List<Reason>,
+    val targets: List<String>,
+    val ranAtMs: Long,
+)
+
+fun writeMutationSnapshotJson(snapshot: MutationSnapshot): String = Gson().toJson(snapshot)
+
+fun parseMutationSnapshot(raw: String): MutationSnapshot? {
+    val root: JsonElement = try {
+        JsonParser.parseString(raw)
+    } catch (e: JsonSyntaxException) {
+        return null
+    }
+    val obj = root.asObjectOrNull() ?: return null
+    val mutation = parseMutationBlock(obj.obj("mutation")) ?: return null
+    val warnings = (obj.array("warnings") ?: return null).map { parseReason(it.asObjectOrNull()) ?: return null }
+    val targets = (obj.array("targets") ?: return null).map { it.asStringOrNull() ?: return null }
+    val ranAtMs = obj.longOrNull("ranAtMs") ?: return null
+    return MutationSnapshot(mutation, warnings, targets, ranAtMs)
+}

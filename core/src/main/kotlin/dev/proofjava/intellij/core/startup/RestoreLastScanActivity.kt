@@ -3,12 +3,15 @@ package dev.proofjava.intellij.core.startup
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
+import dev.proofjava.intellij.core.model.MutationState
 import dev.proofjava.intellij.core.model.PerTestState
 import dev.proofjava.intellij.core.model.coverageStateFrom
 import dev.proofjava.intellij.core.state.CoverageStateService
+import dev.proofjava.intellij.core.state.MutationStateService
 import dev.proofjava.intellij.core.state.PerTestStateService
 import dev.proofjava.intellij.core.ui.gutter.applyGutterCoverage
 import dev.proofjava.intellij.core.verdict.ParseResult
+import dev.proofjava.intellij.core.verdict.parseMutationSnapshot
 import dev.proofjava.intellij.core.verdict.parsePerTestSnapshot
 import dev.proofjava.intellij.core.verdict.parseVerdict
 import java.io.File
@@ -31,8 +34,20 @@ import java.io.File
 class RestoreLastScanActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
         val repo = project.basePath ?: return
+        restoreMutationSnapshot(project, repo)
         val perTestRestored = restorePerTestSnapshot(project, repo)
         restoreVerdictSnapshot(project, repo, perTestRestored)
+    }
+}
+
+/** No `verdict-current.json` fallback, unlike [restorePerTestSnapshot] - `extension.ts`'s own `restoreLastCoverageFrom` has none either: a routine Quick Scan/Deep Scan's own verdict almost never carries a `mutation` block (a separate, opt-in, expensive step), so there is nothing useful to fall back to. */
+private fun restoreMutationSnapshot(project: Project, repo: String) {
+    val raw = runCatching { File(File(repo, ".proof"), "mutation-current.json").readText() }.getOrNull() ?: return
+    val snapshot = parseMutationSnapshot(raw) ?: return
+    ApplicationManager.getApplication().invokeLater {
+        MutationStateService.getInstance(project).publish(
+            MutationState(mutation = snapshot.mutation, warnings = snapshot.warnings, targets = snapshot.targets, ranAt = snapshot.ranAtMs),
+        )
     }
 }
 

@@ -93,6 +93,7 @@ internal fun runAnalyzeCore(
     cli: CliLocation,
     repo: String,
     perTest: EvidenceInput?,
+    mutation: EvidenceInput? = null,
 ): VerdictDocument? {
     val binding = engine.resolveReportBinding(project, DEFAULT_REPORT_PATH)
     val (reportPath, modules) = when (binding) {
@@ -115,6 +116,7 @@ internal fun runAnalyzeCore(
             outPath = outFile.path,
             fileCoverage = true,
             perTest = perTest,
+            mutation = mutation,
         ),
     )
 

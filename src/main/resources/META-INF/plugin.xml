@@ -53,6 +53,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="dev.proofjava.intellij.core.state.CoverageStateService"/>
         <projectService serviceImplementation="dev.proofjava.intellij.core.state.PerTestStateService"/>
+        <projectService serviceImplementation="dev.proofjava.intellij.core.state.MutationStateService"/>
         <!-- Real user feedback (2026-09-07): none of this was reachable
              from IntelliJ's own Settings dialog. jarPath/diffMode/baseRef
              only - reportPath is still hardcoded (a real, disclosed,
@@ -93,6 +94,10 @@
             <action id="dev.proofjava.intellij.DeepScan" class="dev.proofjava.intellij.core.actions.DeepScanAction" text="Deep Scan" description="Quick Scan plus per-test (L2) evidence - which test covers which line" icon="AllIcons.Actions.TraceInto"/>
             <action id="dev.proofjava.intellij.DeepScanWholeModule" class="dev.proofjava.intellij.core.actions.DeepScanWholeModuleAction" text="Deep Scan Whole Module (no diff)" description="Deep Scan every production class from the last Quick Scan, not just the ones the diff touched" icon="AllIcons.Actions.GroupByModule"/>
             <action id="dev.proofjava.intellij.ToggleCoverage" class="dev.proofjava.intellij.core.actions.ToggleCoverageAction" text="Toggle Coverage View" description="Show or hide coverage decorations without re-scanning" icon="AllIcons.Actions.ToggleVisibility"/>
+            <!-- M7: mutation testing - never auto-triggered, always confirmed
+                 first (runtime grows linearly with the target count). -->
+            <action id="dev.proofjava.intellij.MutationForModule" class="dev.proofjava.intellij.core.actions.MutationForModuleAction" text="Mutation Testing (Module)" description="Run PIT mutation testing against the diff's changed production classes - can take a long time"/>
+            <action id="dev.proofjava.intellij.MutationForModuleAll" class="dev.proofjava.intellij.core.actions.MutationForModuleAllAction" text="Mutation Testing (Module, No Diff)" description="Run PIT mutation testing against every production class from the last Quick Scan, not just the ones the diff touched"/>
         </group>
     </actions>
 </idea-plugin>

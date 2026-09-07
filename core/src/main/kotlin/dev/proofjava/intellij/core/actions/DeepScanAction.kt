@@ -103,7 +103,7 @@ fun runDeepScanWholeModule(project: Project, indicator: ProgressIndicator) {
     runDeepScanCore(project, indicator, modules, targets)
 }
 
-private fun resolveModulesOrShowError(project: Project, binding: ReportBindingResult): List<ModuleBinding>? = when (binding) {
+internal fun resolveModulesOrShowError(project: Project, binding: ReportBindingResult): List<ModuleBinding>? = when (binding) {
     is ReportBindingResult.SingleModule -> listOf(ModuleBinding("root", "."))
     is ReportBindingResult.MultiModule -> binding.modules.map { ModuleBinding(it.id, it.root) }
     is ReportBindingResult.NotFound -> {
@@ -174,7 +174,7 @@ private fun runDeepScanCore(project: Project, indicator: ProgressIndicator, modu
     }
 }
 
-private fun showWarningLater(project: Project, message: String) {
+internal fun showWarningLater(project: Project, message: String) {
     ApplicationManager.getApplication().invokeLater {
         com.intellij.openapi.ui.Messages.showWarningDialog(project, message, "Proof")
     }
