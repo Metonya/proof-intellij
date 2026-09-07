@@ -20,7 +20,7 @@ import dev.proofjava.intellij.engine.java.source.productionClassFilter
 import dev.proofjava.intellij.engine.java.source.productionSourceRoots
 import dev.proofjava.intellij.engine.java.source.sourceModuleRoots
 import dev.proofjava.intellij.engine.java.source.testSourceRoots
-import dev.proofjava.intellij.engine.java.source.toAbsolutePath
+import dev.proofjava.intellij.core.util.toAbsolutePath
 import dev.proofjava.intellij.engine.java.verdict.parseTestIdentity
 import java.net.URLEncoder
 

@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project
 import dev.proofjava.intellij.core.cli.ClasspathBinding
 import dev.proofjava.intellij.core.cli.EvidenceInput
 import dev.proofjava.intellij.core.cli.TargetBinding
+import dev.proofjava.intellij.core.engine.ClassTarget
 import dev.proofjava.intellij.core.engine.EvidenceInputsResult
 import dev.proofjava.intellij.core.engine.EvidenceKind
 import dev.proofjava.intellij.core.engine.ModuleBinding
@@ -73,6 +74,30 @@ class DeepScanWholeModuleAction : AnAction("Proof: Deep Scan Whole Module (no di
     }
 }
 
+/**
+ * Single-class sibling of [DeepScanAction]/[DeepScanWholeModuleAction] -
+ * port of `commands.ts`'s `proof.perTestForFile`, the TS source's own
+ * cheapest entry point (a single class, no diff/module scan needed at
+ * all). Needs [activeFileClassTarget] (M7 part 4) - the active-editor-to-
+ * module mapping this whole plan lacked until now.
+ */
+class PerTestForFileAction : AnAction("Proof: Deep Scan This Class") {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
+    override fun actionPerformed(e: AnActionEvent) {
+        val project = e.project ?: return
+        val engine = requireEngine(project) ?: return
+        val classTarget = activeFileClassTarget(project, engine)
+        if (classTarget == null) {
+            showErrorLater(project, "Proof: open a Java file to collect per-test evidence for its class.")
+            return
+        }
+        object : Task.Backgroundable(project, "Proof: deep scanning ${classTarget.fqcn}", true) {
+            override fun run(indicator: ProgressIndicator) = runDeepScanForFile(project, indicator, classTarget)
+        }.queue()
+    }
+}
+
 fun runDeepScan(project: Project, indicator: ProgressIndicator) {
     val engine = requireEngine(project) ?: return
     // The modules to resolve evidence classpaths for are exactly the ones
@@ -80,6 +105,17 @@ fun runDeepScan(project: Project, indicator: ProgressIndicator) {
     // call, which could name modules with no report at all.
     val modules = resolveModulesOrShowError(project, engine.resolveReportBinding(project, DEFAULT_REPORT_PATH)) ?: return
     runDeepScanCore(project, indicator, modules, targets = emptyList())
+}
+
+fun runDeepScanForFile(project: Project, indicator: ProgressIndicator, classTarget: ClassTarget) {
+    val engine = requireEngine(project) ?: return
+    val modules = resolveModulesOrShowError(project, engine.resolveReportBinding(project, DEFAULT_REPORT_PATH)) ?: return
+    val targets = bindTargetsToModules(listOf(classTarget), modules)
+    if (targets.isEmpty()) {
+        showErrorLater(project, "Proof: could not determine which module ${classTarget.fqcn} belongs to.")
+        return
+    }
+    runDeepScanCore(project, indicator, modules, targets)
 }
 
 fun runDeepScanWholeModule(project: Project, indicator: ProgressIndicator) {

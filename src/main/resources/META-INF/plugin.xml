@@ -99,6 +99,17 @@
                  first (runtime grows linearly with the target count). -->
             <action id="dev.proofjava.intellij.MutationForModule" class="dev.proofjava.intellij.core.actions.MutationForModuleAction" text="Mutation Testing (Module)" description="Run PIT mutation testing against the diff's changed production classes - can take a long time" icon="AllIcons.Actions.Lightning"/>
             <action id="dev.proofjava.intellij.MutationForModuleAll" class="dev.proofjava.intellij.core.actions.MutationForModuleAllAction" text="Mutation Testing (Module, No Diff)" description="Run PIT mutation testing against every production class from the last Quick Scan, not just the ones the diff touched" icon="AllIcons.Actions.RunAll"/>
+            <!-- M7 part 4: the single-class entry points - proof-vscode's own
+                 primary/cheapest recommended commands, right-click-driven
+                 there. No diff/module scan needed, so also on the editor's
+                 own context menu, not just this Tools menu. -->
+            <action id="dev.proofjava.intellij.PerTestForFile" class="dev.proofjava.intellij.core.actions.PerTestForFileAction" text="Deep Scan This Class" description="Collect per-test evidence for the active Java file's class - no diff needed"/>
+            <action id="dev.proofjava.intellij.MutationForFile" class="dev.proofjava.intellij.core.actions.MutationForFileAction" text="Mutation Testing For This Class" description="Run PIT mutation testing against the active Java file's class - no diff needed, usually seconds"/>
+        </group>
+        <group id="dev.proofjava.intellij.EditorContextMenu" text="Proof" popup="true">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <reference ref="dev.proofjava.intellij.PerTestForFile"/>
+            <reference ref="dev.proofjava.intellij.MutationForFile"/>
         </group>
     </actions>
 </idea-plugin>

@@ -19,7 +19,7 @@ import dev.proofjava.intellij.engine.java.linetests.locateTestFile
 import dev.proofjava.intellij.engine.java.source.productionClassFilter
 import dev.proofjava.intellij.engine.java.source.sourceModuleRoots
 import dev.proofjava.intellij.engine.java.source.testSourceRoots
-import dev.proofjava.intellij.engine.java.source.toAbsolutePath
+import dev.proofjava.intellij.core.util.toAbsolutePath
 import dev.proofjava.intellij.engine.java.verdict.parseTestIdentity
 import java.awt.BorderLayout
 import java.awt.event.MouseAdapter

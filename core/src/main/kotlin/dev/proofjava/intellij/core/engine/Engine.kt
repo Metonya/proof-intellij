@@ -130,6 +130,12 @@ interface Engine {
      * has.
      */
     fun productionClassTargets(state: CoverageState): List<ClassTarget>
+
+    /** Whether [fileName] (a bare name, e.g. `"Calculator.java"`) is a source file this engine understands at all - the "open a Java file to run this" gate the single-file Deep Scan/Mutation actions need (M7 part 4), by extension since no PSI/file-type dependency exists in this plugin. */
+    fun ownsFile(fileName: String): Boolean
+
+    /** The FQCN this engine would detect for a source file's own text - pure and engine-specific (a future Python engine's own module-naming convention would differ), the single-file Deep Scan/Mutation actions' target. Same text-based detection `hover/HoverContent.kt`'s className lookup already uses, exposed through the `Engine` interface now that a `core`-side caller needs it too. */
+    fun classNameFor(fileText: String, fileBaseNameWithoutExtension: String): String
 }
 
 /** One production class a "whole module, no diff" scan can target directly - [repoRelativePath] is the file it came from (used to bind it to a module via [bindTargetsToModules]), [fqcn] is what actually goes on the CLI's `--per-test-target`/`--mutation-target` flag. */

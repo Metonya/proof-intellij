@@ -1,5 +1,7 @@
 package dev.proofjava.intellij.engine.java.source
 
+import dev.proofjava.intellij.core.util.toAbsolutePath
+import dev.proofjava.intellij.core.util.toRepoRelativePath
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

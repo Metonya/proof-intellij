@@ -1,7 +1,7 @@
 package dev.proofjava.intellij.engine.java.linetests
 
 import dev.proofjava.intellij.engine.java.source.fqcnToRootRelativePath
-import dev.proofjava.intellij.engine.java.source.toAbsolutePath
+import dev.proofjava.intellij.core.util.toAbsolutePath
 import java.io.File
 
 /**

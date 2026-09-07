@@ -5,7 +5,7 @@ import com.intellij.platform.backend.documentation.DocumentationTargetProvider
 import com.intellij.psi.PsiFile
 import dev.proofjava.intellij.core.state.CoverageStateService
 import dev.proofjava.intellij.core.state.PerTestStateService
-import dev.proofjava.intellij.engine.java.source.toRepoRelativePath
+import dev.proofjava.intellij.core.util.toRepoRelativePath
 
 /**
  * SDK wiring for [computeHover] - the IntelliJ equivalent of

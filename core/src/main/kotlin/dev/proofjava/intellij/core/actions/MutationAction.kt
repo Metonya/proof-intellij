@@ -12,6 +12,7 @@ import dev.proofjava.intellij.core.cli.ClasspathBinding
 import dev.proofjava.intellij.core.cli.DiffMode
 import dev.proofjava.intellij.core.cli.EvidenceInput
 import dev.proofjava.intellij.core.cli.TargetBinding
+import dev.proofjava.intellij.core.engine.ClassTarget
 import dev.proofjava.intellij.core.engine.EvidenceInputsResult
 import dev.proofjava.intellij.core.engine.EvidenceKind
 import dev.proofjava.intellij.core.engine.ModuleBinding
@@ -39,13 +40,10 @@ private const val DEFAULT_MUTATION_TIMEOUT_SECONDS = 300
  * [MutationForModuleAllAction] (below, in this same file) is the diff-free
  * sibling - port of `commands.ts`'s `proof.mutationForModuleAll`, sharing
  * [runMutationCore] with [DeepScanAction]'s own `runDeepScanCore` sibling
- * pattern (M6/M7).
- *
- * Not built yet, a disclosed gap matching [RunTestsAction]'s own module-
- * picker limitation: `proof.mutationForFile` (right-click a single class -
- * the TS source's own primary recommended entry point, cheapest to run).
- * It needs an active-editor-to-module mapping this plan has not built for
- * any action yet, not just this one.
+ * pattern (M6/M7). [MutationForFileAction] is the single-class sibling -
+ * port of `commands.ts`'s `proof.mutationForFile`, the TS source's own
+ * primary recommended entry point (cheapest to run, no diff needed) -
+ * built in M7 part 4 once [activeFileClassTarget] existed.
  */
 class MutationForModuleAction : AnAction("Proof: Mutation Testing (Module)") {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
@@ -55,7 +53,7 @@ class MutationForModuleAction : AnAction("Proof: Mutation Testing (Module)") {
         val choice = Messages.showYesNoDialog(
             project,
             "This run can take a while - potentially over an hour for a large module. The mutation timeout is not a total budget, it is an \"idle\" timeout: if this much time passes without a class finishing, the run stops; as long as classes keep finishing, it continues regardless of elapsed time. If it stops, results are still shown as partial.\n\n" +
-                "For a single class instead, use \"Mutation Testing For This Class\" once it exists (not built yet).",
+                "For a single class instead, use \"Mutation Testing For This Class\".",
             "Mutation testing will run for the entire module",
             "Continue",
             "Cancel",
@@ -66,6 +64,30 @@ class MutationForModuleAction : AnAction("Proof: Mutation Testing (Module)") {
         object : Task.Backgroundable(project, "Proof: mutation testing (module)", true) {
             // No target given: the CLI targets the changed production classes in the diff.
             override fun run(indicator: ProgressIndicator) = runMutation(project, indicator, targets = emptyList())
+        }.queue()
+    }
+}
+
+/**
+ * Single-class sibling of [MutationForModuleAction]/[MutationForModuleAllAction] -
+ * port of `commands.ts`'s `proof.mutationForFile`. No diff needed, no
+ * confirmation dialog either (unlike its module-wide siblings) - a single
+ * class is usually seconds, the same reasoning the TS source itself gives
+ * for why this is its own recommended default.
+ */
+class MutationForFileAction : AnAction("Proof: Mutation Testing For This Class") {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
+    override fun actionPerformed(e: AnActionEvent) {
+        val project = e.project ?: return
+        val engine = requireEngine(project) ?: return
+        val classTarget = activeFileClassTarget(project, engine)
+        if (classTarget == null) {
+            showErrorLater(project, "Proof: open a Java file to run mutation testing.")
+            return
+        }
+        object : Task.Backgroundable(project, "Proof: mutation testing ${classTarget.fqcn}", true) {
+            override fun run(indicator: ProgressIndicator) = runMutationForFile(project, indicator, classTarget)
         }.queue()
     }
 }
@@ -115,10 +137,21 @@ class MutationForModuleAllAction : AnAction("Proof: Mutation Testing (Module, No
     }
 }
 
+fun runMutationForFile(project: Project, indicator: ProgressIndicator, classTarget: ClassTarget) {
+    val engine = requireEngine(project) ?: return
+    val modules = resolveModulesOrShowError(project, engine.resolveReportBinding(project, DEFAULT_REPORT_PATH)) ?: return
+    val targets = bindTargetsToModules(listOf(classTarget), modules)
+    if (targets.isEmpty()) {
+        showErrorLater(project, "Proof: could not determine which module ${classTarget.fqcn} belongs to.")
+        return
+    }
+    runMutationCore(project, indicator, modules, targets)
+}
+
 private fun runMutation(project: Project, indicator: ProgressIndicator, targets: List<TargetBinding>) {
     val engine = requireEngine(project) ?: return
     if (targets.isEmpty() && ProofSettingsState.getInstance(project).toDiffMode() is DiffMode.NoVcs) {
-        showErrorLater(project, "Proof: whole-module mutation requires a diff - there is no changed class to target while the diff mode is \"no-vcs\". For a single class, use \"Mutation Testing For This Class\" once it exists (not built yet).")
+        showErrorLater(project, "Proof: whole-module mutation requires a diff - there is no changed class to target while the diff mode is \"no-vcs\". For a single class, use \"Mutation Testing For This Class\".")
         return
     }
     val modules = resolveModulesOrShowError(project, engine.resolveReportBinding(project, DEFAULT_REPORT_PATH)) ?: return

@@ -34,6 +34,7 @@ import dev.proofjava.intellij.engine.java.maven.MavenTestPhase
 import dev.proofjava.intellij.engine.java.maven.interpretMavenFailure
 import dev.proofjava.intellij.engine.java.maven.runMavenTests
 import dev.proofjava.intellij.engine.java.source.classNameFromPath
+import dev.proofjava.intellij.engine.java.source.detectClassName
 import dev.proofjava.intellij.engine.java.source.productionSourceRoots
 import dev.proofjava.intellij.engine.java.source.sourceModuleRoots
 import java.io.File
@@ -128,6 +129,11 @@ class JavaEngine : Engine {
             classNameFromPath(file.path, sourceRoots)?.let { fqcn -> ClassTarget(file.path, fqcn) }
         }
     }
+
+    override fun ownsFile(fileName: String): Boolean = fileName.endsWith(".java")
+
+    override fun classNameFor(fileText: String, fileBaseNameWithoutExtension: String): String =
+        detectClassName(fileText, fileBaseNameWithoutExtension)
 
     companion object {
         /** Matches `preflight.ts`'s own default - no settings service exists yet to make this configurable (same gap `QuickScanAction`'s `DEFAULT_REPORT_PATH` already discloses). */

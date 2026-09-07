@@ -1,42 +1,17 @@
 package dev.proofjava.intellij.engine.java.source
 
 import dev.proofjava.intellij.core.model.CoverageState
-import java.io.File
-import java.nio.file.Path
-import java.nio.file.Paths
 
 /**
- * Port of `proof-vscode/src/model/pathIndex.ts`: repo-relative <-> absolute
- * filesystem path math, plus the Java-source-specific pieces
- * (FQCN <-> path, test-vs-production classification) that make this
- * `engine-java`-only rather than `core` - dot-to-slash-plus-`.java` is a
- * Java convention a future engine's own source layout would not share.
+ * Port of `proof-vscode/src/model/pathIndex.ts`'s Java-source-specific
+ * pieces (FQCN <-> path, test-vs-production classification) - the
+ * `.java`/dot-to-slash convention a future engine's own source layout
+ * would not share. The repo-relative <-> absolute filesystem path math
+ * this file used to also carry moved to `core.util` (M7 part 4, same
+ * names `toAbsolutePath`/`toRepoRelativePath`) once a `core`-side caller
+ * needed it - none of that half was ever actually Java-specific.
  * proof-java's own paths are always forward-slash and repo-relative.
  */
-
-fun toAbsolutePath(projectRoot: String, repoRelativePath: String): String {
-    var result = File(projectRoot)
-    for (segment in repoRelativePath.split("/")) {
-        result = File(result, segment)
-    }
-    return result.path
-}
-
-/** `null` when [absolutePath] is outside [projectRoot] (or on an unrelated filesystem root, e.g. a different Windows drive letter). */
-fun toRepoRelativePath(projectRoot: String, absolutePath: String): String? {
-    val rootPath: Path = Paths.get(projectRoot).normalize()
-    val targetPath: Path = Paths.get(absolutePath).normalize()
-    val relative = try {
-        rootPath.relativize(targetPath)
-    } catch (e: IllegalArgumentException) {
-        return null // different roots entirely (e.g. different drive letters)
-    }
-    val relativeString = relative.toString()
-    if (relativeString.startsWith("..")) {
-        return null // outside the project root
-    }
-    return relativeString.replace(File.separatorChar, '/')
-}
 
 /**
  * An outer FQCN (nested-class suffix already stripped by the caller) to a
