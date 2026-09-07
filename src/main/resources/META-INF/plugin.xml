@@ -87,7 +87,7 @@
             <action id="dev.proofjava.intellij.RunTests" class="dev.proofjava.intellij.core.actions.RunTestsAction" text="Run Tests" description="Run the project's own build tool with JaCoCo, then Quick Scan" icon="AllIcons.General.RunWithCoverage"/>
             <action id="dev.proofjava.intellij.QuickScan" class="dev.proofjava.intellij.core.actions.QuickScanAction" text="Quick Scan" description="Run proof-java and show coverage in the gutter and the Coverage view" icon="AllIcons.Actions.Search"/>
             <action id="dev.proofjava.intellij.DeepScan" class="dev.proofjava.intellij.core.actions.DeepScanAction" text="Deep Scan" description="Quick Scan plus per-test (L2) evidence - which test covers which line" icon="AllIcons.Actions.TraceInto"/>
-            <action id="dev.proofjava.intellij.DeepScanWholeModule" class="dev.proofjava.intellij.core.actions.DeepScanWholeModuleAction" text="Deep Scan Whole Module (no diff)" description="Deep Scan every production class from the last Quick Scan, not just the ones the diff touched"/>
+            <action id="dev.proofjava.intellij.DeepScanWholeModule" class="dev.proofjava.intellij.core.actions.DeepScanWholeModuleAction" text="Deep Scan Whole Module (no diff)" description="Deep Scan every production class from the last Quick Scan, not just the ones the diff touched" icon="AllIcons.Actions.GroupByModule"/>
             <action id="dev.proofjava.intellij.ToggleCoverage" class="dev.proofjava.intellij.core.actions.ToggleCoverageAction" text="Toggle Coverage View" description="Show or hide coverage decorations without re-scanning" icon="AllIcons.Actions.ToggleVisibility"/>
         </group>
     </actions>
