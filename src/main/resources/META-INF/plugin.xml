@@ -28,4 +28,19 @@
     <extensions defaultExtensionNs="dev.proofjava.intellij">
         <engine implementation="dev.proofjava.intellij.engine.java.JavaEngine"/>
     </extensions>
+
+    <!-- M3: Quick Scan's own plumbing - project state, the gutter's
+         reapply-on-new-editor listener, and the Coverage tool window. -->
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="dev.proofjava.intellij.core.state.CoverageStateService"/>
+        <postStartupActivity implementation="dev.proofjava.intellij.core.startup.GutterReapplyActivity"/>
+        <toolWindow id="Proof" anchor="right" factoryClass="dev.proofjava.intellij.core.ui.toolwindow.CoverageToolWindowFactory"/>
+    </extensions>
+
+    <actions>
+        <group id="dev.proofjava.intellij.MainMenu" text="Proof" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="dev.proofjava.intellij.QuickScan" class="dev.proofjava.intellij.core.actions.QuickScanAction" text="Quick Scan" description="Run proof-java and show coverage in the gutter and the Coverage view"/>
+        </group>
+    </actions>
 </idea-plugin>
