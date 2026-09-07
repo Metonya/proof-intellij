@@ -32,13 +32,13 @@ import javax.swing.tree.DefaultTreeModel
  * Swing wiring for `linetests.LineTestsTree`'s node list - "Line → Tests",
  * port of `proof-vscode/src/ui/treeViews/lineTestsView.ts` (the "all
  * classes, no active file" landing mode only - see `LineTestsTree.kt`'s
- * own doc comment for what's disclosed as deferred). Registered as its
- * own top-level tool window (`plugin.xml`), not a second tab merged into
- * `core.ui.toolwindow.CoverageToolWindowFactory`'s "Proof" window - `core`
- * cannot reference this `engine-java` class directly without breaking the
- * module boundary this whole plan is built around, and a real "pluggable
- * tab" extension point is more infrastructure than this milestone needs
- * for a second engine that does not exist yet.
+ * own doc comment for what's disclosed as deferred). Registered as a tab
+ * of `core.ui.toolwindow.CoverageToolWindowFactory`'s "Proof" tool window
+ * via `JavaLineTestsToolWindowTab`/`core.ui.toolwindow.ProofToolWindowTab`
+ * - `core` still never references this `engine-java` class directly, the
+ * extension point is the seam. (Originally its own separate top-level
+ * tool window; real user feedback from a live `runIde` session,
+ * 2026-09-07, found two windows confusing where one, tabbed, is not.)
  */
 class LineTestsToolWindowPanel(private val project: Project) : JPanel(BorderLayout()), Disposable {
 

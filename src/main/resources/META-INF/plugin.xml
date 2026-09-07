@@ -31,12 +31,21 @@
          into. core/engine-java are merged into this one plugin's jar
          (composedJar), not separate "content modules" - this is a plain
          internal strategy-pattern EP, not for third-party contributions. -->
+    <!-- M6 (revised): a tab of the "Proof" tool window an engine
+         contributes without core.ui.toolwindow ever importing
+         engine-java directly - same "EP in core, implementation in
+         engine-java" pattern as `engine` above. Replaces the earlier
+         separate "Proof: Line to Tests" top-level tool window; real user
+         feedback (a live runIde session, 2026-09-07) found two windows
+         confusing where one, tabbed, is not. -->
     <extensionPoints>
         <extensionPoint name="engine" interface="dev.proofjava.intellij.core.engine.Engine" dynamic="true"/>
+        <extensionPoint name="toolWindowTab" interface="dev.proofjava.intellij.core.ui.toolwindow.ProofToolWindowTab" dynamic="true"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="dev.proofjava.intellij">
         <engine implementation="dev.proofjava.intellij.engine.java.JavaEngine"/>
+        <toolWindowTab implementation="dev.proofjava.intellij.engine.java.ui.JavaLineTestsToolWindowTab"/>
     </extensions>
 
     <!-- M3: Quick Scan's own plumbing - project state, the gutter's
@@ -49,12 +58,6 @@
         <!-- M4 -->
         <statusBarWidgetFactory id="dev.proofjava.intellij.statusBar" implementation="dev.proofjava.intellij.core.ui.statusbar.CoverageStatusBarWidgetFactory"/>
         <projectViewNodeDecorator implementation="dev.proofjava.intellij.core.ui.projectview.CoverageFileDecorator"/>
-        <!-- M6: its own top-level tool window, not a tab merged into "Proof" -
-             see LineTestsToolWindowPanel's own doc comment for why. The
-             factory class lives in engine-java; plugin.xml referencing it
-             directly does not violate the core/engine-java source-import
-             boundary (only core/src's own imports are constrained). -->
-        <toolWindow id="Proof: Line to Tests" anchor="right" factoryClass="dev.proofjava.intellij.engine.java.ui.LineTestsToolWindowFactory"/>
         <!-- M6: raw (PsiFile, offset) hover - see hover/HoverContent.kt's
              own doc comment for why this EP and not a PSI-based one. -->
         <platform.backend.documentation.targetProvider implementation="dev.proofjava.intellij.engine.java.hover.CoverageHoverTargetProvider"/>
