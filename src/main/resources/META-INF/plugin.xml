@@ -46,6 +46,7 @@
     <extensions defaultExtensionNs="dev.proofjava.intellij">
         <engine implementation="dev.proofjava.intellij.engine.java.JavaEngine"/>
         <toolWindowTab implementation="dev.proofjava.intellij.engine.java.ui.JavaLineTestsToolWindowTab"/>
+        <toolWindowTab implementation="dev.proofjava.intellij.engine.java.ui.JavaMutationToolWindowTab"/>
     </extensions>
 
     <!-- M3: Quick Scan's own plumbing - project state, the gutter's
