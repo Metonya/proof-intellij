@@ -1,0 +1,19 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>dev.proofjava.intellij</id>
+    <name>Proof</name>
+    <vendor>proof-java</vendor>
+    <description><![CDATA[
+        <p>See which of your passing tests actually prove anything, inline as you code.</p>
+        <p>Runs <a href="https://github.com/Metonya/proof-java">proof-java</a> against your project and shows
+        its verdict directly in the editor: which lines are covered, which of the tests covering them have no
+        real assertion, and which mutations nothing catches.</p>
+    ]]></description>
+
+    <!-- M0: platform-only dependency, no UI/actions/tool windows registered
+         yet - this milestone's only goal is "runIde launches a blank
+         plugin." Java-language-specific gating (editor/context menus,
+         hover) is added in later milestones alongside the UI it belongs to,
+         not here - `core` itself stays language-agnostic. -->
+    <depends>com.intellij.modules.platform</depends>
+</idea-plugin>
