@@ -1,5 +1,6 @@
 package dev.proofjava.intellij.engine.java.source
 
+import dev.proofjava.intellij.core.model.CoverageState
 import dev.proofjava.intellij.core.verdict.FileCoverageBlock
 
 /**
@@ -38,4 +39,20 @@ fun productionSourceRoots(modules: List<SourceModuleRoots>): List<String> {
 fun testSourceRoots(modules: List<SourceModuleRoots>): List<String> {
     val declared = modules.flatMap { it.testRoots }
     return declared.ifEmpty { listOf("src/test/java") }
+}
+
+/**
+ * Which classes are production, from `fileCoverage.files[]` (this run's own
+ * authoritative list) - `null` (no filter, nothing excluded) when there is
+ * no `fileCoverage` block to build one from, matching `lineTestsView.ts`'s
+ * own "missing information must not silently delete evidence" rule.
+ * Shared by every `engine-java` caller that needs to tell production
+ * classes from test classes in `perTest.entries` (the Line→Tests tool
+ * window and the hover provider both need this exact join), so it exists
+ * once, not once per caller.
+ */
+fun productionClassFilter(coverageState: CoverageState?): ((String) -> Boolean)? {
+    val fileCoverage = coverageState?.fileCoverage ?: return null
+    val index = buildProductionClassIndex(fileCoverage, productionSourceRoots(sourceModuleRoots(coverageState)))
+    return { outerClassName -> index.byClassName.containsKey(outerClassName) }
 }

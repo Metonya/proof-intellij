@@ -16,6 +16,16 @@
          hover) is added in later milestones alongside the UI it belongs to,
          not here - `core` itself stays language-agnostic. -->
     <depends>com.intellij.modules.platform</depends>
+    <!-- M6: the hover provider registers against
+         `platform.backend.documentation.targetProvider`, which lives in
+         `intellij.platform.lang.impl` (module id `com.intellij.modules.lang`)
+         - bundled in every IntelliJ IDEA distribution, but declared
+         explicitly per JetBrains' own recommended practice for plugins
+         using lang-impl APIs (real examples: the Python plugin's own
+         `RequirementDocumentationLinkHandler` registration). Not
+         `com.intellij.modules.java` / `com.intellij.java` - no Java PSI
+         dependency is added here, by design (see `hover/HoverContent.kt`). -->
+    <depends>com.intellij.modules.lang</depends>
 
     <!-- M2: the extension point core.engine.Engine implementations plug
          into. core/engine-java are merged into this one plugin's jar
@@ -45,6 +55,10 @@
              directly does not violate the core/engine-java source-import
              boundary (only core/src's own imports are constrained). -->
         <toolWindow id="Proof: Line to Tests" anchor="right" factoryClass="dev.proofjava.intellij.engine.java.ui.LineTestsToolWindowFactory"/>
+        <!-- M6: raw (PsiFile, offset) hover - see hover/HoverContent.kt's
+             own doc comment for why this EP and not a PSI-based one. -->
+        <platform.backend.documentation.targetProvider implementation="dev.proofjava.intellij.engine.java.hover.CoverageHoverTargetProvider"/>
+        <platform.backend.documentation.linkHandler implementation="dev.proofjava.intellij.engine.java.hover.CoverageHoverLinkHandler"/>
     </extensions>
 
     <actions>

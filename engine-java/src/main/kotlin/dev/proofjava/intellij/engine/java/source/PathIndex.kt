@@ -1,5 +1,6 @@
 package dev.proofjava.intellij.engine.java.source
 
+import dev.proofjava.intellij.core.model.CoverageState
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -74,6 +75,10 @@ fun classNameFromPath(repoRelativePath: String, sourceRoots: List<String>): Stri
 enum class SourceKind { TEST, PRODUCTION, UNKNOWN }
 
 data class SourceModuleRoots(val sourceRoots: List<String> = emptyList(), val testRoots: List<String> = emptyList())
+
+/** Bridges `core.model.CoverageState`'s generic `ModuleInput.sourceRoots`/`testRoots` to the [SourceModuleRoots] shape this file's own functions expect - shared by every `engine-java` caller that needs both, so it exists once, not once per caller. */
+fun sourceModuleRoots(coverageState: CoverageState): List<SourceModuleRoots> =
+    coverageState.modules.map { SourceModuleRoots(it.sourceRoots, it.testRoots) }
 
 fun classifySourcePath(repoRelativePath: String, modules: List<SourceModuleRoots>): SourceKind {
     // testRoots checked first: if one root is declared as a subdirectory of

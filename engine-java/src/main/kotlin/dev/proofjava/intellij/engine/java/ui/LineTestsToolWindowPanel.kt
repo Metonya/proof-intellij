@@ -6,7 +6,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
-import dev.proofjava.intellij.core.model.CoverageState
 import dev.proofjava.intellij.core.state.CoverageStateService
 import dev.proofjava.intellij.core.state.PerTestStateService
 import dev.proofjava.intellij.core.verdict.Finding
@@ -17,9 +16,8 @@ import dev.proofjava.intellij.engine.java.linetests.lineTestsClassChildren
 import dev.proofjava.intellij.engine.java.linetests.lineTestsProdLineChildren
 import dev.proofjava.intellij.engine.java.linetests.lineTestsRootChildren
 import dev.proofjava.intellij.engine.java.linetests.locateTestFile
-import dev.proofjava.intellij.engine.java.source.SourceModuleRoots
-import dev.proofjava.intellij.engine.java.source.buildProductionClassIndex
-import dev.proofjava.intellij.engine.java.source.productionSourceRoots
+import dev.proofjava.intellij.engine.java.source.productionClassFilter
+import dev.proofjava.intellij.engine.java.source.sourceModuleRoots
 import dev.proofjava.intellij.engine.java.source.testSourceRoots
 import dev.proofjava.intellij.engine.java.source.toAbsolutePath
 import dev.proofjava.intellij.engine.java.verdict.parseTestIdentity
@@ -126,24 +124,4 @@ class LineTestsToolWindowPanel(private val project: Project) : JPanel(BorderLayo
     private class Entry(private val label: String, val node: LineTestsNode) {
         override fun toString(): String = label
     }
-}
-
-/** Bridges `core.model.CoverageState`'s generic `ModuleInput.sourceRoots`/`testRoots` to the Java-specific [SourceModuleRoots] shape `source.PathIndex`'s functions expect. */
-private fun sourceModuleRoots(coverageState: CoverageState): List<SourceModuleRoots> =
-    coverageState.modules.map { SourceModuleRoots(it.sourceRoots, it.testRoots) }
-
-/**
- * Which classes are production, from `fileCoverage.files[]` (this run's own
- * authoritative list) - `null` (no filter, nothing excluded) when there is
- * no `fileCoverage` block to build one from, matching `lineTestsView.ts`'s
- * own "missing information must not silently delete evidence" rule. A
- * top-level function, not inlined into a `?.let { }` chain - Kotlin parsed
- * a bare trailing lambda there as an argument to `let` itself rather than
- * this function's return value, a real parse-ambiguity bug caught by the
- * compiler, not designed around in advance.
- */
-private fun productionClassFilter(coverageState: CoverageState?): ((String) -> Boolean)? {
-    val fileCoverage = coverageState?.fileCoverage ?: return null
-    val index = buildProductionClassIndex(fileCoverage, productionSourceRoots(sourceModuleRoots(coverageState)))
-    return { outerClassName -> index.byClassName.containsKey(outerClassName) }
 }
