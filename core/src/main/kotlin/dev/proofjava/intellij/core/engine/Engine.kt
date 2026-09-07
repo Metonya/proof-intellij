@@ -1,5 +1,6 @@
 package dev.proofjava.intellij.core.engine
 
+import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import java.io.File
 
@@ -15,10 +16,24 @@ interface ProjectKind
 /** Where to run the CLI from - `executable` is `"java"` for proof-java today, but a future engine's own binary need not go through a JVM at all, hence the separate [jarPath]. */
 data class CliLocation(val executable: String, val jarPath: String? = null)
 
+data class ModuleReportBinding(val id: String, val root: String, val reportPath: String)
+
 sealed interface ReportBindingResult {
     /** The configured (or default) report already exists exactly where expected - no discovery needed. */
     data class SingleModule(val reportPath: String) : ReportBindingResult
+    /** A real multi-module discovery found one or more reports, each bound to a real module id (M5) - engines override [Engine.resolveReportBinding] to produce this. */
+    data class MultiModule(val modules: List<ModuleReportBinding>) : ReportBindingResult
     data object NotFound : ReportBindingResult
+}
+
+/** A discovered module the user can pick to scope a test run to - id + repo-relative root, nothing else (an [Engine]'s own module-discovery result before any report exists). */
+data class ModuleBinding(val id: String, val root: String)
+
+sealed interface TestRunResult {
+    /** The task ran to completion (Maven/Gradle itself decided success or failure) - [capturedOutput] is handed to [Engine.interpretTestFailure] on failure. */
+    data class Completed(val success: Boolean, val capturedOutput: String) : TestRunResult
+    /** The task never ran at all (the user declined a warning dialog, or opened a file to fix by hand instead) - distinct from a real failure. */
+    data object NotRun : TestRunResult
 }
 
 /**
@@ -60,4 +75,20 @@ interface Engine {
             ReportBindingResult.NotFound
         }
     }
+
+    /** Every module this engine can find in [project], before any report or test run - the source a "Run Tests" module-scope picker lists. Empty when the build tool has nothing to discover (or none is present at all). */
+    fun discoverModules(project: Project): List<ModuleBinding>
+
+    /**
+     * Drives this engine's build tool to (re)produce coverage evidence,
+     * scoped to [moduleRoots] (empty means the whole project/reactor - the
+     * only option on a first-ever run, before anything is known). Runs
+     * synchronously on the calling thread - callers already run this
+     * inside their own `Task.Backgroundable`, mirroring [dev.proofjava.intellij.core.cli.run]'s
+     * own "the caller owns the background thread" contract.
+     */
+    fun runTests(project: Project, moduleRoots: List<String>, indicator: ProgressIndicator): TestRunResult
+
+    /** Turns raw build-tool output into an actionable sentence, or `null` when the failure shape isn't recognized (hard rule 3a - never a guess). */
+    fun interpretTestFailure(rawOutput: String): String?
 }
