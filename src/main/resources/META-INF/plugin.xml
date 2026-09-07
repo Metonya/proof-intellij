@@ -53,6 +53,12 @@
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="dev.proofjava.intellij.core.state.CoverageStateService"/>
         <projectService serviceImplementation="dev.proofjava.intellij.core.state.PerTestStateService"/>
+        <!-- Real user feedback (2026-09-07): none of this was reachable
+             from IntelliJ's own Settings dialog. jarPath/diffMode/baseRef
+             only - reportPath is still hardcoded (a real, disclosed,
+             separate gap, see QuickScanAction.kt). -->
+        <projectService serviceImplementation="dev.proofjava.intellij.core.settings.ProofSettingsState"/>
+        <projectConfigurable instance="dev.proofjava.intellij.core.settings.ProofConfigurable" id="dev.proofjava.intellij.settings" displayName="Proof"/>
         <postStartupActivity implementation="dev.proofjava.intellij.core.startup.GutterReapplyActivity"/>
         <toolWindow id="Proof" anchor="right" factoryClass="dev.proofjava.intellij.core.ui.toolwindow.CoverageToolWindowFactory"/>
         <!-- M4 -->
@@ -81,6 +87,7 @@
             <action id="dev.proofjava.intellij.RunTests" class="dev.proofjava.intellij.core.actions.RunTestsAction" text="Run Tests" description="Run the project's own build tool with JaCoCo, then Quick Scan" icon="AllIcons.General.RunWithCoverage"/>
             <action id="dev.proofjava.intellij.QuickScan" class="dev.proofjava.intellij.core.actions.QuickScanAction" text="Quick Scan" description="Run proof-java and show coverage in the gutter and the Coverage view" icon="AllIcons.Actions.Search"/>
             <action id="dev.proofjava.intellij.DeepScan" class="dev.proofjava.intellij.core.actions.DeepScanAction" text="Deep Scan" description="Quick Scan plus per-test (L2) evidence - which test covers which line" icon="AllIcons.Actions.TraceInto"/>
+            <action id="dev.proofjava.intellij.DeepScanWholeModule" class="dev.proofjava.intellij.core.actions.DeepScanWholeModuleAction" text="Deep Scan Whole Module (no diff)" description="Deep Scan every production class from the last Quick Scan, not just the ones the diff touched"/>
             <action id="dev.proofjava.intellij.ToggleCoverage" class="dev.proofjava.intellij.core.actions.ToggleCoverageAction" text="Toggle Coverage View" description="Show or hide coverage decorations without re-scanning" icon="AllIcons.Actions.ToggleVisibility"/>
         </group>
     </actions>

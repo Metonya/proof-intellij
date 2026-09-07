@@ -3,6 +3,7 @@ package dev.proofjava.intellij.engine.java
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import dev.proofjava.intellij.core.engine.CliLocation
+import dev.proofjava.intellij.core.engine.ClassTarget
 import dev.proofjava.intellij.core.engine.Engine
 import dev.proofjava.intellij.core.engine.EvidenceInputsResult
 import dev.proofjava.intellij.core.engine.EvidenceKind
@@ -11,6 +12,8 @@ import dev.proofjava.intellij.core.engine.ModuleReportBinding
 import dev.proofjava.intellij.core.engine.ProjectKind
 import dev.proofjava.intellij.core.engine.ReportBindingResult
 import dev.proofjava.intellij.core.engine.TestRunResult
+import dev.proofjava.intellij.core.model.CoverageState
+import dev.proofjava.intellij.core.settings.ProofSettingsState
 import dev.proofjava.intellij.engine.java.buildtool.JavaProjectKind
 import dev.proofjava.intellij.engine.java.buildtool.detectProjectKind
 import dev.proofjava.intellij.engine.java.classpath.resolveEvidenceInputs
@@ -29,6 +32,9 @@ import dev.proofjava.intellij.engine.java.locator.locateJar
 import dev.proofjava.intellij.engine.java.maven.MavenTestPhase
 import dev.proofjava.intellij.engine.java.maven.interpretMavenFailure
 import dev.proofjava.intellij.engine.java.maven.runMavenTests
+import dev.proofjava.intellij.engine.java.source.classNameFromPath
+import dev.proofjava.intellij.engine.java.source.productionSourceRoots
+import dev.proofjava.intellij.engine.java.source.sourceModuleRoots
 import java.io.File
 
 /**
@@ -43,7 +49,8 @@ class JavaEngine : Engine {
 
     override fun locateCli(project: Project): CliLocation? {
         val root = project.basePath ?: return null
-        val jarPath = locateJar(root) ?: return null
+        val configuredPath = ProofSettingsState.getInstance(project).jarPath
+        val jarPath = locateJar(root, configuredPath) ?: return null
         return CliLocation(executable = "java", jarPath = jarPath)
     }
 
@@ -109,6 +116,15 @@ class JavaEngine : Engine {
         val root = project.basePath ?: return EvidenceInputsResult.Unavailable
         val cli = locateCli(project) ?: return EvidenceInputsResult.Unavailable
         return resolveEvidenceInputs(project, root, cli, modules, kind, indicator)
+    }
+
+    /** Port of `ui/commands.ts`'s `allProductionTargets`: every `fileCoverage.files[]` entry that names a real FQCN under a declared source root - the "whole module, no diff" Deep Scan entry point's target list. */
+    override fun productionClassTargets(state: CoverageState): List<ClassTarget> {
+        val fileCoverage = state.fileCoverage ?: return emptyList()
+        val sourceRoots = productionSourceRoots(sourceModuleRoots(state))
+        return fileCoverage.files.mapNotNull { file ->
+            classNameFromPath(file.path, sourceRoots)?.let { fqcn -> ClassTarget(file.path, fqcn) }
+        }
     }
 
     companion object {

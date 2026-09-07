@@ -9,7 +9,6 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import dev.proofjava.intellij.core.cli.AnalyzeArgsInput
-import dev.proofjava.intellij.core.cli.DiffMode
 import dev.proofjava.intellij.core.cli.EvidenceInput
 import dev.proofjava.intellij.core.cli.ModuleReportBinding
 import dev.proofjava.intellij.core.cli.RunOptions
@@ -23,6 +22,7 @@ import dev.proofjava.intellij.core.engine.Engine
 import dev.proofjava.intellij.core.engine.EngineRegistry
 import dev.proofjava.intellij.core.engine.ReportBindingResult
 import dev.proofjava.intellij.core.model.coverageStateFrom
+import dev.proofjava.intellij.core.settings.ProofSettingsState
 import dev.proofjava.intellij.core.state.CoverageStateService
 import dev.proofjava.intellij.core.ui.gutter.applyGutterCoverage
 import dev.proofjava.intellij.core.verdict.AnalysisStatus
@@ -50,12 +50,10 @@ import java.io.File
  * without either synthesizing a fake [AnActionEvent] (same reasoning as
  * [toggleCoverage]'s own split).
  *
- * Simplifications explicit to this milestone, not oversights:
- * - [DEFAULT_REPORT_PATH] is a hardcoded constant (matches proof-vscode's
- *   own `proof.reportPath` default) - no settings service/Configurable
- *   exists yet to make it configurable.
- * - Diff mode is always [DiffMode.Uncommitted] - the diff-mode setting is
- *   the same "no settings service yet" gap.
+ * Simplification still explicit, not an oversight: [DEFAULT_REPORT_PATH]
+ * is a hardcoded constant (matches proof-vscode's own `proof.reportPath`
+ * default) - no `reportPath` setting exists yet, unlike jar path/diff
+ * mode/base ref ([dev.proofjava.intellij.core.settings.ProofSettingsState]).
  */
 const val DEFAULT_REPORT_PATH = "target/site/jacoco/jacoco.xml"
 
@@ -111,7 +109,7 @@ internal fun runAnalyzeCore(
     val args = buildAnalyzeArgs(
         AnalyzeArgsInput(
             repo = repo,
-            diffMode = DiffMode.Uncommitted,
+            diffMode = ProofSettingsState.getInstance(project).toDiffMode(),
             reportPath = reportPath,
             modules = modules,
             outPath = outFile.path,

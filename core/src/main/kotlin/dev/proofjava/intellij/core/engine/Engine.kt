@@ -2,6 +2,8 @@ package dev.proofjava.intellij.core.engine
 
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import dev.proofjava.intellij.core.cli.TargetBinding
+import dev.proofjava.intellij.core.model.CoverageState
 import java.io.File
 
 /**
@@ -113,4 +115,58 @@ interface Engine {
      * anything (a real build-tool invocation, not a silent side effect).
      */
     fun resolveEvidenceInputs(project: Project, modules: List<ModuleBinding>, kind: EvidenceKind, indicator: ProgressIndicator): EvidenceInputsResult
+
+    /**
+     * Every production class this engine can name from [state]'s last
+     * scan, [ClassTarget.repoRelativePath] repo-relative - the "whole
+     * module, no diff" Deep Scan/Mutation entry point's target list (port
+     * of `ui/commands.ts`'s `allProductionTargets`). Naming a class from a
+     * file path is engine-specific (a future Python engine's own module-
+     * to-FQCN convention would differ), unlike binding a target to the
+     * module that owns it ([bindTargetsToModules], `core`-side - a path-
+     * prefix match is not engine-specific). Empty when [state] has no
+     * `fileCoverage` block yet - the caller must have run Quick Scan
+     * first, same requirement `commands.ts`'s own `runAnalyzePerTestAll`
+     * has.
+     */
+    fun productionClassTargets(state: CoverageState): List<ClassTarget>
 }
+
+/** One production class a "whole module, no diff" scan can target directly - [repoRelativePath] is the file it came from (used to bind it to a module via [bindTargetsToModules]), [fqcn] is what actually goes on the CLI's `--per-test-target`/`--mutation-target` flag. */
+data class ClassTarget(val repoRelativePath: String, val fqcn: String)
+
+/**
+ * Which bound module a repo-relative path falls under - longest-root-
+ * prefix wins (a nested module's own root must outrank its parent's),
+ * `root == "."` is the lowest-priority fallback since it matches
+ * everything. `null` means the path is not under any bound module's root
+ * at all - callers must not guess (hard rule 3a). Port of
+ * `cli/reportDiscovery.ts`'s `moduleForPath`, `core`-scoped (unlike
+ * `engine-java`'s own near-identical copy over its own `ModuleRoot` type)
+ * since binding a target to a module is not engine-specific.
+ */
+private fun moduleForPath(repoRelativePath: String, modules: List<ModuleBinding>): String? {
+    var bestId: String? = null
+    var bestPrefixLength = -1
+    for (module in modules) {
+        if (module.root == ".") {
+            if (bestId == null) {
+                bestId = module.id
+                bestPrefixLength = 0
+            }
+            continue
+        }
+        val prefix = "${module.root}/"
+        if (repoRelativePath.startsWith(prefix) && prefix.length > bestPrefixLength) {
+            bestId = module.id
+            bestPrefixLength = prefix.length
+        }
+    }
+    return bestId
+}
+
+/** [targets] paired with the [ModuleBinding] each one's own file falls under - a target under no declared module root is dropped, not guessed. */
+fun bindTargetsToModules(targets: List<ClassTarget>, modules: List<ModuleBinding>): List<TargetBinding> =
+    targets.mapNotNull { target ->
+        moduleForPath(target.repoRelativePath, modules)?.let { moduleId -> TargetBinding(moduleId, target.fqcn) }
+    }
