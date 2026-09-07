@@ -29,6 +29,17 @@ data class CoverageState(
     val modules: List<ModuleInput>,
 )
 
+/**
+ * [warnings] is [VerdictDocument.warnings] plus [Analysis.incompleteReasons]
+ * - a real bug fix (2026-09-07): a Deep Scan that came back with no
+ * per-test evidence had its real reason (`PER_TEST_JDK_UNSUPPORTED` - the
+ * embedded PIT engine needs JDK <= 22, this machine runs 25) sitting in
+ * `analysis.incompleteReasons`, a field nothing displayed anywhere -
+ * `warnings[]` already has a real UI (the Coverage tool window's
+ * Warnings section), and `incompleteReasons` is the exact same `Reason`
+ * shape, so folding them together here means every future consumer of
+ * `warnings` sees both for free, no separate UI surface needed.
+ */
 fun coverageStateFrom(projectRoot: String, document: VerdictDocument): CoverageState = CoverageState(
     projectRoot = projectRoot,
     fileCoverage = document.fileCoverage,
@@ -36,6 +47,6 @@ fun coverageStateFrom(projectRoot: String, document: VerdictDocument): CoverageS
     newCode = document.coverage.newCode,
     changedFiles = document.changedFiles,
     findings = document.findings,
-    warnings = document.warnings,
+    warnings = document.warnings + document.analysis.incompleteReasons,
     modules = document.inputs.modules,
 )

@@ -490,6 +490,34 @@ class VerdictParserTest {
         assertEquals(3L, parsed.warnings[0].count)
     }
 
+    /**
+     * Regression test for a real bug a live Deep Scan caught: `analysis.incompleteReasons`
+     * items are the exact same `Reason` shape `warnings[]` uses (schema
+     * `$defs/reason`, confirmed against the real schema before fixing this) -
+     * this used to be typed `List<String>` and parsed with a bare
+     * `it.toString()`, so a real reason like `PER_TEST_JDK_UNSUPPORTED`
+     * came through as raw untyped JSON text instead of a queryable `Reason`.
+     */
+    @Test
+    fun `analysis_incompleteReasons parses as real Reason objects, not raw JSON text`() {
+        val doc = minimalDocument()
+        (doc.getAsJsonObject("analysis")).add(
+            "incompleteReasons",
+            JsonArray().apply {
+                add(
+                    JsonObject().apply {
+                        addProperty("code", "PER_TEST_JDK_UNSUPPORTED")
+                        addProperty("message", "--per-test-report needs a JDK of 22 or lower; this analysis is running on 25.")
+                    },
+                )
+            },
+        )
+        val parsed = okOrFail(doc)
+        assertEquals(1, parsed.analysis.incompleteReasons.size)
+        assertEquals("PER_TEST_JDK_UNSUPPORTED", parsed.analysis.incompleteReasons[0].code)
+        assertTrue(parsed.analysis.incompleteReasons[0].message.contains("JDK"))
+    }
+
     @Test
     fun `never throws on a completely empty string either`() {
         val result = parseVerdict("")

@@ -15,8 +15,20 @@ data class ToolInfo(val name: String, val version: String)
 data class Analysis(
     val status: AnalysisStatus,
     val exitCode: Int,
-    /** Kept as raw JSON text per element (hard rule 3a: shape not yet needed by any consumer here, never guessed). */
-    val incompleteReasons: List<String>,
+    /**
+     * Real bug fixed 2026-09-07, caught by a live Deep Scan that came
+     * back with no per-test evidence and a genuinely useful reason
+     * (`PER_TEST_JDK_UNSUPPORTED`) nowhere visible: this was typed
+     * `List<String>` and parsed with `it.toString()` (the raw JSON
+     * element's own text, e.g. `{"code":"...","message":"..."}` as one
+     * ugly string) - the schema (`$defs/reason`, same shape `warnings[]`
+     * uses) and `AnalysisReason.java` both confirm these are real
+     * `Reason`s, not opaque strings. `proof-vscode` itself never actually
+     * reads this field either (`readonly unknown[]` in its own
+     * `types.ts`, never surfaced in any UI) - not a regression to match,
+     * a real gap worth actually closing here.
+     */
+    val incompleteReasons: List<Reason>,
 )
 
 data class Inputs(val modules: List<ModuleInput>)

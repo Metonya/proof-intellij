@@ -83,7 +83,7 @@ private fun parseVerdictDocument(obj: JsonObject): VerdictDocument? {
     val analysis = Analysis(
         status = status,
         exitCode = analysisObj.longOrNull("exitCode")?.toInt() ?: return null,
-        incompleteReasons = (analysisObj.array("incompleteReasons") ?: return null).map { it.toString() },
+        incompleteReasons = (analysisObj.array("incompleteReasons") ?: return null).map { parseReason(it.asObjectOrNull()) ?: return null },
     )
 
     val inputsObj = obj.obj("inputs") ?: return null
