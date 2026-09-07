@@ -149,7 +149,24 @@ internal fun runAnalyzeCore(
     // exit 3 (incomplete) still writes a real document - read it rather
     // than treating it as failure (hard rule 3a).
     if (result.exitCode != 0 && result.exitCode != 3) {
-        showErrorLater(project, "Proof: analysis failed (exit code ${result.exitCode}).")
+        // A bare "exit code 1" is exactly what a launch-level failure -
+        // wrong `java` for this jar, most concretely - looks like from
+        // here; real user question (2026-09-07): does a Java-version
+        // mismatch show something actionable, on this machine or a
+        // different one? The stderr text (already captured, just never
+        // shown here - proof-vscode's own runAnalyzeCore has the same
+        // gap, its sibling exportReport command's error message does
+        // include it) is the only place that answer lives, e.g. a JVM's
+        // own "UnsupportedClassVersionError: ... class file version
+        // X.0, this version of the Java Runtime only recognizes class
+        // file versions up to Y.0" for a `java` too old for this jar.
+        val detail = result.stderr.trim()
+        val message = if (detail.isEmpty()) {
+            "Proof: analysis failed (exit code ${result.exitCode})."
+        } else {
+            "Proof: analysis failed (exit code ${result.exitCode}). $detail"
+        }
+        showErrorLater(project, message)
         return null
     }
 
