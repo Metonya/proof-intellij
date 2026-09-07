@@ -12,6 +12,8 @@ plugins {
 // :core must never depend back on this module.
 dependencies {
     implementation(project(":core"))
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 kotlin {
@@ -19,4 +21,8 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_25)
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

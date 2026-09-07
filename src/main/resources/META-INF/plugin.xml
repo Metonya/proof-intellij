@@ -16,4 +16,16 @@
          hover) is added in later milestones alongside the UI it belongs to,
          not here - `core` itself stays language-agnostic. -->
     <depends>com.intellij.modules.platform</depends>
+
+    <!-- M2: the extension point core.engine.Engine implementations plug
+         into. core/engine-java are merged into this one plugin's jar
+         (composedJar), not separate "content modules" - this is a plain
+         internal strategy-pattern EP, not for third-party contributions. -->
+    <extensionPoints>
+        <extensionPoint name="engine" interface="dev.proofjava.intellij.core.engine.Engine" dynamic="true"/>
+    </extensionPoints>
+
+    <extensions defaultExtensionNs="dev.proofjava.intellij">
+        <engine implementation="dev.proofjava.intellij.engine.java.JavaEngine"/>
+    </extensions>
 </idea-plugin>
