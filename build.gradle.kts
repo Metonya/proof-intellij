@@ -48,7 +48,7 @@ kotlin {
 
 intellijPlatform {
     pluginConfiguration {
-        id = "dev.proofjava.intellij"
+        id = "dev.proofjava.plugin"
         name = "Proof"
         version = providers.gradleProperty("pluginVersion").get()
 
