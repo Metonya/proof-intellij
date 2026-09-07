@@ -9,8 +9,8 @@ import com.intellij.ui.content.ContentFactory
 
 /** Title-bar buttons for the tool window's own most common actions - added here, once, since it needs the real registered [com.intellij.openapi.actionSystem.AnAction] instances by id (`plugin.xml`'s `<actions>` block), not a re-declaration. Real user feedback (a live `runIde` session, 2026-09-07): reaching every action through the Tools menu was tiring - these mirror what a VS Code view-title-bar icon row already gives that extension's users. */
 private val TITLE_ACTION_IDS = listOf(
-    "dev.proofjava.intellij.QuickScan",
     "dev.proofjava.intellij.RunTests",
+    "dev.proofjava.intellij.QuickScan",
     "dev.proofjava.intellij.DeepScan",
     "dev.proofjava.intellij.ToggleCoverage",
 )

@@ -64,13 +64,24 @@
         <platform.backend.documentation.linkHandler implementation="dev.proofjava.intellij.engine.java.hover.CoverageHoverLinkHandler"/>
     </extensions>
 
+    <!-- Icons via AllIcons.* (a real, supported plugin.xml `icon` attribute
+         form - verified against real bundled plugin.xml examples in
+         JetBrains/intellij-community, e.g. hg4idea's own actions), not
+         custom SVGs: proof-vscode itself never assigned these four
+         commands an icon either (checked its package.json - only
+         Export/Settings/Install-Skill/Download-jar get one, via VS Code's
+         built-in codicon font, and none of those four are in this set),
+         so there is nothing to port here, only a genuine IntelliJ-side
+         addition. Ordered Run Tests before Quick Scan - real user
+         feedback (2026-09-07): you need a JaCoCo report before a scan can
+         read one, so that's the natural first step. -->
     <actions>
         <group id="dev.proofjava.intellij.MainMenu" text="Proof" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
-            <action id="dev.proofjava.intellij.QuickScan" class="dev.proofjava.intellij.core.actions.QuickScanAction" text="Quick Scan" description="Run proof-java and show coverage in the gutter and the Coverage view"/>
-            <action id="dev.proofjava.intellij.RunTests" class="dev.proofjava.intellij.core.actions.RunTestsAction" text="Run Tests" description="Run the project's own build tool with JaCoCo, then Quick Scan"/>
-            <action id="dev.proofjava.intellij.DeepScan" class="dev.proofjava.intellij.core.actions.DeepScanAction" text="Deep Scan" description="Quick Scan plus per-test (L2) evidence - which test covers which line"/>
-            <action id="dev.proofjava.intellij.ToggleCoverage" class="dev.proofjava.intellij.core.actions.ToggleCoverageAction" text="Toggle Coverage View" description="Show or hide coverage decorations without re-scanning"/>
+            <action id="dev.proofjava.intellij.RunTests" class="dev.proofjava.intellij.core.actions.RunTestsAction" text="Run Tests" description="Run the project's own build tool with JaCoCo, then Quick Scan" icon="AllIcons.General.RunWithCoverage"/>
+            <action id="dev.proofjava.intellij.QuickScan" class="dev.proofjava.intellij.core.actions.QuickScanAction" text="Quick Scan" description="Run proof-java and show coverage in the gutter and the Coverage view" icon="AllIcons.Actions.Search"/>
+            <action id="dev.proofjava.intellij.DeepScan" class="dev.proofjava.intellij.core.actions.DeepScanAction" text="Deep Scan" description="Quick Scan plus per-test (L2) evidence - which test covers which line" icon="AllIcons.Actions.TraceInto"/>
+            <action id="dev.proofjava.intellij.ToggleCoverage" class="dev.proofjava.intellij.core.actions.ToggleCoverageAction" text="Toggle Coverage View" description="Show or hide coverage decorations without re-scanning" icon="AllIcons.Actions.ToggleVisibility"/>
         </group>
     </actions>
 </idea-plugin>
