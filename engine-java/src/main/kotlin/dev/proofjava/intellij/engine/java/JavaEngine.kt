@@ -29,6 +29,7 @@ import dev.proofjava.intellij.engine.java.discovery.PROJECT_ROOT_MARKER_FILES
 import dev.proofjava.intellij.engine.java.gradle.interpretGradleFailure
 import dev.proofjava.intellij.engine.java.gradle.runGradleTests
 import dev.proofjava.intellij.engine.java.locator.locateJar
+import dev.proofjava.intellij.engine.java.locator.locateJavaExecutable
 import dev.proofjava.intellij.engine.java.maven.MavenTestPhase
 import dev.proofjava.intellij.engine.java.maven.interpretMavenFailure
 import dev.proofjava.intellij.engine.java.maven.runMavenTests
@@ -49,9 +50,10 @@ class JavaEngine : Engine {
 
     override fun locateCli(project: Project): CliLocation? {
         val root = project.basePath ?: return null
-        val configuredPath = ProofSettingsState.getInstance(project).jarPath
-        val jarPath = locateJar(root, configuredPath) ?: return null
-        return CliLocation(executable = "java", jarPath = jarPath)
+        val settings = ProofSettingsState.getInstance(project)
+        val jarPath = locateJar(root, settings.jarPath) ?: return null
+        val executable = locateJavaExecutable(project, settings.javaExecutable)
+        return CliLocation(executable = executable, jarPath = jarPath)
     }
 
     override fun detectProjectKind(project: Project): ProjectKind? {

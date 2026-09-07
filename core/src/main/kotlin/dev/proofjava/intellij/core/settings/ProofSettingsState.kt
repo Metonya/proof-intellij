@@ -28,6 +28,21 @@ class ProofSettingsState : PersistentStateComponent<ProofSettingsState.State> {
             myState.jarPath = value
         }
 
+    /**
+     * `null`/blank means "auto-detect" - `engine-java`'s own
+     * `locateJavaExecutable` then prefers the IntelliJ Project SDK's own
+     * `java` binary over a bare `"java"` inherited from whatever
+     * environment launched the IDE process. Set this only when the
+     * project's own SDK does not satisfy `--per-test-report`'s JDK <= 22
+     * ceiling either (real user scenario, 2026-09-07: PIT's embedded
+     * engine rejected a run launched under JDK 25).
+     */
+    var javaExecutable: String?
+        get() = myState.javaExecutable?.takeIf { it.isNotBlank() }
+        set(value) {
+            myState.javaExecutable = value
+        }
+
     var diffMode: String
         get() = myState.diffMode
         set(value) {
@@ -55,6 +70,7 @@ class ProofSettingsState : PersistentStateComponent<ProofSettingsState.State> {
 
     class State {
         var jarPath: String? = null
+        var javaExecutable: String? = null
         var diffMode: String = DIFF_MODE_UNCOMMITTED
         var baseRef: String? = null
     }
