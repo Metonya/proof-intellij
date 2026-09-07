@@ -49,7 +49,7 @@ class MavenErrorInterpreterTest {
     }
 
     private val gsonTestJpmsModuleNotFound = "\n[ERROR] COMPILATION ERROR :\n" +
-        "[ERROR] /C:/Users/Mert/Desktop/coverdict-ws/coverdict-corpus/gson/test-jpms/src/test/java/module-info.java:[19,22] module not found: com.google.gson\n" +
+        "[ERROR] /repo/gson/test-jpms/src/test/java/module-info.java:[19,22] module not found: com.google.gson\n" +
         "[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:testCompile (default-testCompile) on project test-jpms: Compilation failure\n"
 
     @Test
