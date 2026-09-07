@@ -35,12 +35,16 @@
         <projectService serviceImplementation="dev.proofjava.intellij.core.state.CoverageStateService"/>
         <postStartupActivity implementation="dev.proofjava.intellij.core.startup.GutterReapplyActivity"/>
         <toolWindow id="Proof" anchor="right" factoryClass="dev.proofjava.intellij.core.ui.toolwindow.CoverageToolWindowFactory"/>
+        <!-- M4 -->
+        <statusBarWidgetFactory id="dev.proofjava.intellij.statusBar" implementation="dev.proofjava.intellij.core.ui.statusbar.CoverageStatusBarWidgetFactory"/>
+        <projectViewNodeDecorator implementation="dev.proofjava.intellij.core.ui.projectview.CoverageFileDecorator"/>
     </extensions>
 
     <actions>
         <group id="dev.proofjava.intellij.MainMenu" text="Proof" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
             <action id="dev.proofjava.intellij.QuickScan" class="dev.proofjava.intellij.core.actions.QuickScanAction" text="Quick Scan" description="Run proof-java and show coverage in the gutter and the Coverage view"/>
+            <action id="dev.proofjava.intellij.ToggleCoverage" class="dev.proofjava.intellij.core.actions.ToggleCoverageAction" text="Toggle Coverage View" description="Show or hide coverage decorations without re-scanning"/>
         </group>
     </actions>
 </idea-plugin>

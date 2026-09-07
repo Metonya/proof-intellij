@@ -42,6 +42,7 @@ class CoverageStateService : Disposable {
 
     fun setGutterVisible(visible: Boolean) {
         gutterVisible = visible
+        listeners.forEach { it() }
     }
 
     /** [listenerDisposable] controls unsubscription (e.g. the tool window's own panel) - independent of this service's own lifetime, which is the project's. */
