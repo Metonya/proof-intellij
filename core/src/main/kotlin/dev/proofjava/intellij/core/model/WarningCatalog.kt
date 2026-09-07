@@ -67,6 +67,16 @@ private val CATALOG: Map<String, CatalogEntry> = mapOf(
         explanation = "The engine reported an error for this module; its per-test evidence was skipped. Coverage numbers are unaffected, only \"which test covers which line\" is missing.",
         action = "Check the proof-java log for detail.",
     ),
+    // Not in proof-vscode's own warningCatalog.ts either (a real, common
+    // code missing from both catalogs until a live runIde run against a
+    // real repo surfaced a wall of unlabeled instances of it). Title/
+    // explanation match proof-java-cli's own ReportLabels.java entry
+    // verbatim, not invented here.
+    "UNTRACKED_NON_JAVA_FILE" to CatalogEntry(
+        title = "Untracked file",
+        explanation = "A non-Java file that git does not track was ignored in the diff analysis.",
+        action = "Nothing to do - this is informational, not an error.",
+    ),
 )
 
 fun warningInfo(reason: Reason): WarningInfo {

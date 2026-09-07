@@ -7,7 +7,7 @@ import dev.proofjava.intellij.core.model.BadgeMetric
 import dev.proofjava.intellij.core.model.forBadgeMetric
 import dev.proofjava.intellij.core.model.rollupFolder
 import dev.proofjava.intellij.core.state.CoverageStateService
-import java.io.File
+import dev.proofjava.intellij.core.util.absoluteVfsPath
 
 /**
  * IntelliJ port of `proof-vscode/src/ui/explorerBadges.ts`, via the
@@ -36,7 +36,7 @@ class CoverageFileDecorator : ProjectViewNodeDecorator {
         val fileCoverage = state.fileCoverage ?: return
         val virtualFile = node.virtualFile ?: return
 
-        val fileEntry = fileCoverage.files.find { File(state.projectRoot, it.path).path == virtualFile.path }
+        val fileEntry = fileCoverage.files.find { absoluteVfsPath(state.projectRoot, it.path) == virtualFile.path }
         if (fileEntry != null) {
             val percent = fileEntry.metrics.forBadgeMetric(BadgeMetric.SONAR_COMPATIBLE).percent ?: return
             data.locationString = formatPercent(percent)
@@ -45,7 +45,7 @@ class CoverageFileDecorator : ProjectViewNodeDecorator {
 
         if (virtualFile.isDirectory) {
             val prefix = virtualFile.path + "/"
-            val childFiles = fileCoverage.files.filter { File(state.projectRoot, it.path).path.startsWith(prefix) }
+            val childFiles = fileCoverage.files.filter { absoluteVfsPath(state.projectRoot, it.path).startsWith(prefix) }
             if (childFiles.isEmpty()) return
             val rollup = rollupFolder(childFiles, BadgeMetric.SONAR_COMPATIBLE)
             val percent = rollup.percent ?: return

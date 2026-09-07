@@ -99,7 +99,19 @@ class CoverageToolWindowPanel(private val project: Project) : JPanel(BorderLayou
             val (start, end) = node.range
             if (start == end) "Line $start" else "Line $start-$end"
         }
-        is CoverageNode.WarningNode -> warningInfo(node.reason).title
+        // Real bug caught in a live runIde run: a project with several
+        // UNTRACKED_NON_JAVA_FILE warnings (a real, common code - not in
+        // either this or the TS source's own WarningCatalog) rendered as a
+        // wall of identical unlabeled rows, since the title alone is the
+        // bare code for an unrecognized one. coverageView.ts's own
+        // warningItem only puts `reason.path` in a hover tooltip, which
+        // doesn't help a Swing tree the same way a VS Code hover would -
+        // appending it to the label itself is a deliberate improvement
+        // over the TS source, not a straight port.
+        is CoverageNode.WarningNode -> {
+            val title = warningInfo(node.reason).title
+            node.reason.path?.let { "$title: $it" } ?: title
+        }
     }
 
     private fun sectionLabel(id: CoverageSectionId): String = when (id) {

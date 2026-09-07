@@ -15,9 +15,9 @@ import dev.proofjava.intellij.core.model.LineState
 import dev.proofjava.intellij.core.model.classifyLine
 import dev.proofjava.intellij.core.model.mapLines
 import dev.proofjava.intellij.core.state.CoverageStateService
+import dev.proofjava.intellij.core.util.absoluteVfsPath
 import dev.proofjava.intellij.core.verdict.FileCoverageBlock
 import java.awt.Color
-import java.io.File
 
 /**
  * IntelliJ port of `proof-vscode/src/ui/gutterRenderer.ts`.
@@ -61,8 +61,7 @@ private val TRACKED_HIGHLIGHTERS: Key<MutableList<RangeHighlighter>> = Key.creat
 fun applyGutterCoverage(project: Project, projectRoot: String, block: FileCoverageBlock, colorblindMode: Boolean = false) {
     val palette = if (colorblindMode) COLORBLIND_PALETTE else DEFAULT_PALETTE
     val statesByAbsolutePath: Map<String, Map<Int, LineState>> = block.files.associate { entry ->
-        val absolutePath = File(projectRoot, entry.path).path
-        absolutePath to mapLines(entry.lines).associate { it.line to classifyLine(it) }
+        absoluteVfsPath(projectRoot, entry.path) to mapLines(entry.lines).associate { it.line to classifyLine(it) }
     }
 
     for (editor in editorsForProject(project)) {
@@ -98,7 +97,7 @@ fun registerGutterReapplyListener(project: Project, parentDisposable: com.intell
                 val fileCoverage = service.state?.fileCoverage ?: return
                 if (!service.gutterVisible) return
                 val file = FileDocumentManager.getInstance().getFile(editor.document) ?: return
-                val entry = fileCoverage.files.find { File(service.state!!.projectRoot, it.path).path == file.path } ?: return
+                val entry = fileCoverage.files.find { absoluteVfsPath(service.state!!.projectRoot, it.path) == file.path } ?: return
                 val states = mapLines(entry.lines).associate { it.line to classifyLine(it) }
                 paintEditor(editor, states, DEFAULT_PALETTE)
             }
