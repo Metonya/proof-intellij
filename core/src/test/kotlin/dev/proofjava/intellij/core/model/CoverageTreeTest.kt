@@ -32,6 +32,7 @@ class CoverageTreeTest {
         overall = metricSet(),
         newCode = newCode,
         changedFiles = changedFiles,
+        findings = emptyList(),
         warnings = warnings,
         modules = emptyList(),
     )

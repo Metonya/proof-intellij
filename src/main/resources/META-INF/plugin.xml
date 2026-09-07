@@ -39,6 +39,12 @@
         <!-- M4 -->
         <statusBarWidgetFactory id="dev.proofjava.intellij.statusBar" implementation="dev.proofjava.intellij.core.ui.statusbar.CoverageStatusBarWidgetFactory"/>
         <projectViewNodeDecorator implementation="dev.proofjava.intellij.core.ui.projectview.CoverageFileDecorator"/>
+        <!-- M6: its own top-level tool window, not a tab merged into "Proof" -
+             see LineTestsToolWindowPanel's own doc comment for why. The
+             factory class lives in engine-java; plugin.xml referencing it
+             directly does not violate the core/engine-java source-import
+             boundary (only core/src's own imports are constrained). -->
+        <toolWindow id="Proof: Line to Tests" anchor="right" factoryClass="dev.proofjava.intellij.engine.java.ui.LineTestsToolWindowFactory"/>
     </extensions>
 
     <actions>

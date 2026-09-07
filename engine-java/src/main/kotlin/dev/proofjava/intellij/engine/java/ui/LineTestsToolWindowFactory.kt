@@ -1,0 +1,15 @@
+package dev.proofjava.intellij.engine.java.ui
+
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.ToolWindow
+import com.intellij.openapi.wm.ToolWindowFactory
+import com.intellij.ui.content.ContentFactory
+
+class LineTestsToolWindowFactory : ToolWindowFactory {
+    override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        val panel = LineTestsToolWindowPanel(project)
+        val content = ContentFactory.getInstance().createContent(panel, "", false)
+        content.setDisposer(panel)
+        toolWindow.contentManager.addContent(content)
+    }
+}

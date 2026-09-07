@@ -2,6 +2,7 @@ package dev.proofjava.intellij.core.model
 
 import dev.proofjava.intellij.core.verdict.ChangedFile
 import dev.proofjava.intellij.core.verdict.FileCoverageBlock
+import dev.proofjava.intellij.core.verdict.Finding
 import dev.proofjava.intellij.core.verdict.MetricSet
 import dev.proofjava.intellij.core.verdict.ModuleInput
 import dev.proofjava.intellij.core.verdict.NewCodeCoverage
@@ -23,6 +24,7 @@ data class CoverageState(
     val overall: MetricSet,
     val newCode: NewCodeCoverage,
     val changedFiles: List<ChangedFile>,
+    val findings: List<Finding>,
     val warnings: List<Reason>,
     val modules: List<ModuleInput>,
 )
@@ -33,6 +35,7 @@ fun coverageStateFrom(projectRoot: String, document: VerdictDocument): CoverageS
     overall = document.coverage.overall,
     newCode = document.coverage.newCode,
     changedFiles = document.changedFiles,
+    findings = document.findings,
     warnings = document.warnings,
     modules = document.inputs.modules,
 )
