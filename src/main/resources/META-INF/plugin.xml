@@ -38,9 +38,18 @@
          separate "Proof: Line to Tests" top-level tool window; real user
          feedback (a live runIde session, 2026-09-07) found two windows
          confusing where one, tabbed, is not. -->
+    <!-- Real regression caught live (2026-09-07): a bare `name="engine"`
+         auto-qualifies to `<owning-plugin-id>.engine` - it silently broke
+         (both tool window tabs vanished, "Missing extension point") the
+         moment the plugin `<id>` changed to `dev.proofjava.plugin`, since
+         `EngineRegistry.kt`/`ProofToolWindowTab.kt`'s own `ExtensionPointName.create(...)`
+         calls (and this file's own `defaultExtensionNs="dev.proofjava.intellij"`
+         below) still hardcode the old prefix. `qualifiedName` decouples
+         this plugin's own internal EP namespace from its `<id>` for good -
+         a future id change cannot silently break these again. -->
     <extensionPoints>
-        <extensionPoint name="engine" interface="dev.proofjava.intellij.core.engine.Engine" dynamic="true"/>
-        <extensionPoint name="toolWindowTab" interface="dev.proofjava.intellij.core.ui.toolwindow.ProofToolWindowTab" dynamic="true"/>
+        <extensionPoint qualifiedName="dev.proofjava.intellij.engine" interface="dev.proofjava.intellij.core.engine.Engine" dynamic="true"/>
+        <extensionPoint qualifiedName="dev.proofjava.intellij.toolWindowTab" interface="dev.proofjava.intellij.core.ui.toolwindow.ProofToolWindowTab" dynamic="true"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="dev.proofjava.intellij">
