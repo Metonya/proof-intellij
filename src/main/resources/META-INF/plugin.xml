@@ -97,8 +97,8 @@
             <action id="dev.proofjava.intellij.ToggleCoverage" class="dev.proofjava.intellij.core.actions.ToggleCoverageAction" text="Toggle Coverage View" description="Show or hide coverage decorations without re-scanning" icon="AllIcons.Actions.ToggleVisibility"/>
             <!-- M7: mutation testing - never auto-triggered, always confirmed
                  first (runtime grows linearly with the target count). -->
-            <action id="dev.proofjava.intellij.MutationForModule" class="dev.proofjava.intellij.core.actions.MutationForModuleAction" text="Mutation Testing (Module)" description="Run PIT mutation testing against the diff's changed production classes - can take a long time"/>
-            <action id="dev.proofjava.intellij.MutationForModuleAll" class="dev.proofjava.intellij.core.actions.MutationForModuleAllAction" text="Mutation Testing (Module, No Diff)" description="Run PIT mutation testing against every production class from the last Quick Scan, not just the ones the diff touched"/>
+            <action id="dev.proofjava.intellij.MutationForModule" class="dev.proofjava.intellij.core.actions.MutationForModuleAction" text="Mutation Testing (Module)" description="Run PIT mutation testing against the diff's changed production classes - can take a long time" icon="AllIcons.Actions.Lightning"/>
+            <action id="dev.proofjava.intellij.MutationForModuleAll" class="dev.proofjava.intellij.core.actions.MutationForModuleAllAction" text="Mutation Testing (Module, No Diff)" description="Run PIT mutation testing against every production class from the last Quick Scan, not just the ones the diff touched" icon="AllIcons.Actions.RunAll"/>
         </group>
     </actions>
 </idea-plugin>

@@ -13,6 +13,8 @@ private val TITLE_ACTION_IDS = listOf(
     "dev.proofjava.intellij.QuickScan",
     "dev.proofjava.intellij.DeepScan",
     "dev.proofjava.intellij.DeepScanWholeModule",
+    "dev.proofjava.intellij.MutationForModule",
+    "dev.proofjava.intellij.MutationForModuleAll",
     "dev.proofjava.intellij.ToggleCoverage",
 )
 
