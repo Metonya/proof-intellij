@@ -121,6 +121,13 @@
                  own context menu, not just this Tools menu. -->
             <action id="dev.proofjava.intellij.PerTestForFile" class="dev.proofjava.intellij.core.actions.PerTestForFileAction" text="Deep Scan This Class" description="Collect per-test evidence for the active Java file's class - no diff needed"/>
             <action id="dev.proofjava.intellij.MutationForFile" class="dev.proofjava.intellij.core.actions.MutationForFileAction" text="Mutation Testing For This Class" description="Run PIT mutation testing against the active Java file's class - no diff needed, usually seconds"/>
+            <!-- M8: port of proof-vscode's own "Faz 34" convenience commands
+                 (ui/jarDownloaderUi.ts, ui/skillInstaller.ts) - both
+                 Java-specific by content (hardcoded to the Metonya/proof-java
+                 repo), so registered against engine-java classes directly,
+                 same as JavaEngine/JavaMutationToolWindowTab above. -->
+            <action id="dev.proofjava.intellij.DownloadJar" class="dev.proofjava.intellij.engine.java.actions.DownloadJarAction" text="Download proof-java.jar" description="Download the latest proof-java.jar from GitHub, verified against its published SHA-256 checksum"/>
+            <action id="dev.proofjava.intellij.InstallSkill" class="dev.proofjava.intellij.engine.java.actions.InstallSkillAction" text="Install Skill" description="Install the proof-java skill for Claude Code, Windsurf, Antigravity, or any Cursor/Codex/Gemini-CLI/Copilot-compatible tool"/>
         </group>
         <group id="dev.proofjava.intellij.EditorContextMenu" text="Proof" popup="true">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
