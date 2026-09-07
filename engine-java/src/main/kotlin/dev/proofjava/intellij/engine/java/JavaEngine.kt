@@ -4,6 +4,8 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import dev.proofjava.intellij.core.engine.CliLocation
 import dev.proofjava.intellij.core.engine.Engine
+import dev.proofjava.intellij.core.engine.EvidenceInputsResult
+import dev.proofjava.intellij.core.engine.EvidenceKind
 import dev.proofjava.intellij.core.engine.ModuleBinding
 import dev.proofjava.intellij.core.engine.ModuleReportBinding
 import dev.proofjava.intellij.core.engine.ProjectKind
@@ -11,6 +13,7 @@ import dev.proofjava.intellij.core.engine.ReportBindingResult
 import dev.proofjava.intellij.core.engine.TestRunResult
 import dev.proofjava.intellij.engine.java.buildtool.JavaProjectKind
 import dev.proofjava.intellij.engine.java.buildtool.detectProjectKind
+import dev.proofjava.intellij.engine.java.classpath.resolveEvidenceInputs
 import dev.proofjava.intellij.engine.java.discovery.bindModules
 import dev.proofjava.intellij.engine.java.discovery.discoverModuleRootsFromPoms
 import dev.proofjava.intellij.engine.java.discovery.discoverModuleRootsFromSettingsGradle
@@ -101,6 +104,12 @@ class JavaEngine : Engine {
 
     override fun interpretTestFailure(rawOutput: String): String? =
         interpretMavenFailure(rawOutput)?.detail ?: interpretGradleFailure(rawOutput)?.detail
+
+    override fun resolveEvidenceInputs(project: Project, modules: List<ModuleBinding>, kind: EvidenceKind, indicator: ProgressIndicator): EvidenceInputsResult {
+        val root = project.basePath ?: return EvidenceInputsResult.Unavailable
+        val cli = locateCli(project) ?: return EvidenceInputsResult.Unavailable
+        return resolveEvidenceInputs(project, root, cli, modules, kind, indicator)
+    }
 
     companion object {
         /** Matches `preflight.ts`'s own default - no settings service exists yet to make this configurable (same gap `QuickScanAction`'s `DEFAULT_REPORT_PATH` already discloses). */

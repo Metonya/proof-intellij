@@ -3,12 +3,9 @@ package dev.proofjava.intellij.core.actions
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.Messages
-import dev.proofjava.intellij.core.engine.EngineRegistry
 import dev.proofjava.intellij.core.engine.TestRunResult
 import dev.proofjava.intellij.core.ui.dialogs.ModulePickerDialog
 import dev.proofjava.intellij.core.ui.dialogs.ModulePickerItem
@@ -34,11 +31,7 @@ class RunTestsAction : AnAction("Proof: Run Tests") {
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        val engine = EngineRegistry.firstRegisteredEngine()
-        if (engine == null) {
-            Messages.showErrorDialog(project, "No engine is registered - this is a packaging bug, not a project problem.", "Proof")
-            return
-        }
+        val engine = requireEngine(project) ?: return
 
         val modules = engine.discoverModules(project)
         val moduleRoots: List<String> = when {
@@ -73,8 +66,4 @@ class RunTestsAction : AnAction("Proof: Run Tests") {
             }
         }.queue()
     }
-}
-
-private fun showErrorLater(project: Project, message: String) {
-    ApplicationManager.getApplication().invokeLater { Messages.showErrorDialog(project, message, "Proof") }
 }

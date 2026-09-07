@@ -36,6 +36,18 @@ sealed interface TestRunResult {
     data object NotRun : TestRunResult
 }
 
+enum class EvidenceKind { PER_TEST, MUTATION }
+
+/** One module's resolved classpath-list path, repo-relative - the shape `--per-test-classpath`/`--mutation-classpath` bindings need. */
+data class EvidenceClasspath(val moduleId: String, val path: String)
+
+sealed interface EvidenceInputsResult {
+    /** [classpaths] is what was actually resolved (possibly a subset of the requested modules); [missingModuleRoots] names the rest so the caller can say evidence won't be collected for them, without failing the whole scan (L1 coverage stays complete either way). */
+    data class Resolved(val classpaths: List<EvidenceClasspath>, val missingModuleRoots: List<String>) : EvidenceInputsResult
+    /** Nothing could be resolved at all, or the user declined to generate what was missing - the caller must not proceed with L2/L3. */
+    data object Unavailable : EvidenceInputsResult
+}
+
 /**
  * The extension point a language/build-tool backend implements to plug into
  * proof-intellij's language-agnostic `core` - `JavaEngine` (`:engine-java`)
@@ -91,4 +103,14 @@ interface Engine {
 
     /** Turns raw build-tool output into an actionable sentence, or `null` when the failure shape isn't recognized (hard rule 3a - never a guess). */
     fun interpretTestFailure(rawOutput: String): String?
+
+    /**
+     * Resolves the classpath list(s) L2/L3 evidence collection needs, one
+     * per module in [modules] - generating missing ones (typically via this
+     * engine's own `doctor --fix`-equivalent) is this method's job, not the
+     * caller's. Runs on the caller's own background thread, same contract
+     * as [runTests]; may show a confirmation dialog before generating
+     * anything (a real build-tool invocation, not a silent side effect).
+     */
+    fun resolveEvidenceInputs(project: Project, modules: List<ModuleBinding>, kind: EvidenceKind, indicator: ProgressIndicator): EvidenceInputsResult
 }

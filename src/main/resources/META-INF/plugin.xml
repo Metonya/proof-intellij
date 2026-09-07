@@ -33,6 +33,7 @@
          reapply-on-new-editor listener, and the Coverage tool window. -->
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="dev.proofjava.intellij.core.state.CoverageStateService"/>
+        <projectService serviceImplementation="dev.proofjava.intellij.core.state.PerTestStateService"/>
         <postStartupActivity implementation="dev.proofjava.intellij.core.startup.GutterReapplyActivity"/>
         <toolWindow id="Proof" anchor="right" factoryClass="dev.proofjava.intellij.core.ui.toolwindow.CoverageToolWindowFactory"/>
         <!-- M4 -->
@@ -45,6 +46,7 @@
             <add-to-group group-id="ToolsMenu" anchor="last"/>
             <action id="dev.proofjava.intellij.QuickScan" class="dev.proofjava.intellij.core.actions.QuickScanAction" text="Quick Scan" description="Run proof-java and show coverage in the gutter and the Coverage view"/>
             <action id="dev.proofjava.intellij.RunTests" class="dev.proofjava.intellij.core.actions.RunTestsAction" text="Run Tests" description="Run the project's own build tool with JaCoCo, then Quick Scan"/>
+            <action id="dev.proofjava.intellij.DeepScan" class="dev.proofjava.intellij.core.actions.DeepScanAction" text="Deep Scan" description="Quick Scan plus per-test (L2) evidence - which test covers which line"/>
             <action id="dev.proofjava.intellij.ToggleCoverage" class="dev.proofjava.intellij.core.actions.ToggleCoverageAction" text="Toggle Coverage View" description="Show or hide coverage decorations without re-scanning"/>
         </group>
     </actions>
