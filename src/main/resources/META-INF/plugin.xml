@@ -75,7 +75,14 @@
              the last scan's results immediately, same as proof-vscode
              already does - it never did here until now. -->
         <postStartupActivity implementation="dev.proofjava.intellij.core.startup.RestoreLastScanActivity"/>
-        <toolWindow id="Proof" anchor="right" factoryClass="dev.proofjava.intellij.core.ui.toolwindow.CoverageToolWindowFactory"/>
+        <!-- Real source: proof-vscode's own media/activity-bar-icon.svg,
+             ported to two explicit-color SVGs (proof.svg/proof_dark.svg in
+             core's resources) - `fill="currentColor"` is a CSS/browser
+             concept the IntelliJ SVG icon renderer does not resolve
+             (verified against real bundled icons, e.g.
+             platform/icons/src/toolwindows/toolWindowStructure.svg, which
+             hardcodes #6E6E6E/#AFB1B3 for light/dark, not currentColor). -->
+        <toolWindow id="Proof" anchor="right" icon="dev.proofjava.intellij.core.icons.ProofIcons.ToolWindow" factoryClass="dev.proofjava.intellij.core.ui.toolwindow.CoverageToolWindowFactory"/>
         <!-- M4 -->
         <statusBarWidgetFactory id="dev.proofjava.intellij.statusBar" implementation="dev.proofjava.intellij.core.ui.statusbar.CoverageStatusBarWidgetFactory"/>
         <projectViewNodeDecorator implementation="dev.proofjava.intellij.core.ui.projectview.CoverageFileDecorator"/>
