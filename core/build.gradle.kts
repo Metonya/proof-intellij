@@ -12,13 +12,25 @@ plugins {
 // (`Yol-Haritasi-TODO.md` §3 plan file) is built around, enforced here by
 // simply never adding such a dependency, not by convention.
 //
-// No dependencies{} block here on purpose: a module submodule with no own
-// `intellijPlatform {}` declaration inherits the root project's target
-// IntelliJ Platform SDK automatically (JetBrains 2.x multi-module docs).
+// No IntelliJ-Platform-specific dependencies{} block here on purpose: a
+// module submodule with no own `intellijPlatform {}` declaration inherits
+// the root project's target IntelliJ Platform SDK automatically (JetBrains
+// 2.x multi-module docs). The plain JUnit dependency below is unrelated -
+// `core.verdict`/`core.cli.AnalyzeArgsBuilder`/`core.cli.ProgressLineParser`
+// have zero `com.intellij.*` imports and must stay testable with plain
+// JUnit alone, no IntelliJ Platform test fixture needed.
+dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
 
 kotlin {
     jvmToolchain(25) // must match root's toolchain - IntelliJ Platform 2026.2.2 requires JDK 25
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_25)
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
