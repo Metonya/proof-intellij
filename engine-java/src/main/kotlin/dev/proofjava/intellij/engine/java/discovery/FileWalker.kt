@@ -4,13 +4,22 @@ import java.io.File
 
 /**
  * IntelliJ-Platform-free directory walk used by module/report discovery -
- * the counterpart to `vscode.workspace.findFiles`'s glob in the TS source.
- * Excludes the same kind of heavy/irrelevant directories a real glob
- * exclusion (a `node_modules` pattern) would skip, plus the build-output
- * directories a Maven/Gradle repo itself produces (walking into `target`/
- * `build` would find generated `pom.xml` copies and stale reports).
+ * the counterpart to `vscode.workspace.findFiles`'s glob in the TS source,
+ * which excludes only a `node_modules` subtree for both the `pom.xml`
+ * search (`preflight.ts:162`) and the report search (`preflight.ts:310`) -
+ * NOT `target`/`build`. A real bug lived here until a live `runIde` test
+ * against a Gradle project caught it: `target`/`build` were excluded too,
+ * on the (never-verified-against-the-TS-source) theory that walking into
+ * them would only find stale generated copies - but the Gradle JaCoCo
+ * report this whole search exists to find (`build/reports/jacoco/test/
+ * jacocoTestReport.xml`) lives inside `build`, so that exclusion made
+ * every Gradle project's report undiscoverable. `node_modules`/`out` are
+ * excluded as a harmless optimization (never contain a real match this
+ * project cares about) that doesn't diverge from the TS source's own
+ * observable behavior; dot-directories (`.git`, `.gradle`, `.idea`, ...)
+ * are already skipped below regardless of this set.
  */
-private val EXCLUDED_DIR_NAMES = setOf(".git", "node_modules", "target", "build", ".gradle", ".idea", "out")
+private val EXCLUDED_DIR_NAMES = setOf("node_modules", "out")
 
 /** Every `pom.xml` under [root], repo-relative, forward-slash, capped at [limit] like the TS source's own glob call. */
 fun findPomFiles(root: String, limit: Int = 200): List<String> = walk(root, "pom.xml", limit)
