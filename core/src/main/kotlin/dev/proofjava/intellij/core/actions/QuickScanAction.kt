@@ -25,11 +25,11 @@ import dev.proofjava.intellij.core.model.coverageStateFrom
 import dev.proofjava.intellij.core.settings.ProofSettingsState
 import dev.proofjava.intellij.core.state.CoverageStateService
 import dev.proofjava.intellij.core.ui.gutter.applyGutterCoverage
+import dev.proofjava.intellij.core.util.proofStorageFile
 import dev.proofjava.intellij.core.verdict.AnalysisStatus
 import dev.proofjava.intellij.core.verdict.ParseResult
 import dev.proofjava.intellij.core.verdict.VerdictDocument
 import dev.proofjava.intellij.core.verdict.parseVerdict
-import java.io.File
 
 /**
  * "Quick Scan" - port of `proof-vscode`'s `proof.analyze` command
@@ -105,7 +105,7 @@ internal fun runAnalyzeCore(
     }
 
     indicator.isIndeterminate = true
-    val outFile = File(File(repo, ".proof"), "verdict-current.json").apply { parentFile.mkdirs() }
+    val outFile = proofStorageFile(repo, "verdict-current.json")
     val args = buildAnalyzeArgs(
         AnalyzeArgsInput(
             repo = repo,

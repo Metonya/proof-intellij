@@ -60,6 +60,10 @@
         <projectService serviceImplementation="dev.proofjava.intellij.core.settings.ProofSettingsState"/>
         <projectConfigurable instance="dev.proofjava.intellij.core.settings.ProofConfigurable" id="dev.proofjava.intellij.settings" displayName="Proof"/>
         <postStartupActivity implementation="dev.proofjava.intellij.core.startup.GutterReapplyActivity"/>
+        <!-- Real user request (2026-09-07): a project reopen should show
+             the last scan's results immediately, same as proof-vscode
+             already does - it never did here until now. -->
+        <postStartupActivity implementation="dev.proofjava.intellij.core.startup.RestoreLastScanActivity"/>
         <toolWindow id="Proof" anchor="right" factoryClass="dev.proofjava.intellij.core.ui.toolwindow.CoverageToolWindowFactory"/>
         <!-- M4 -->
         <statusBarWidgetFactory id="dev.proofjava.intellij.statusBar" implementation="dev.proofjava.intellij.core.ui.statusbar.CoverageStatusBarWidgetFactory"/>

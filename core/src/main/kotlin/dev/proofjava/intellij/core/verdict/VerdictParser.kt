@@ -1,5 +1,6 @@
 package dev.proofjava.intellij.core.verdict
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -326,4 +327,39 @@ private fun parseMutationBlock(obj: JsonObject?): MutationBlock? {
     val engineVersion = obj.stringOrNull("engineVersion") ?: return null
     val modules = (obj.array("modules") ?: return null).map { parseMutationModuleEvidence(it.asObjectOrNull()) ?: return null }
     return MutationBlock(engine, engineVersion, modules)
+}
+
+/**
+ * Port of `proof-vscode/src/ui/commands.ts`'s `PerTestSnapshot` - the
+ * `.proof/pertest-current.json` shape a Deep Scan writes and a later
+ * project open restores from, independent of `verdict-current.json`
+ * (mirrors the TS source's own "each snapshot lives in its own file, one
+ * being missing/corrupt must not take the others down with it" design).
+ * Not built until a real caller existed (M6's Deep Scan action, plus a
+ * direct 2026-09-07 user request after comparing against the real
+ * `proof-vscode` behavior side by side) - this file's own header comment
+ * flagged it as deliberately deferred, not forgotten, until then.
+ */
+data class PerTestSnapshot(
+    val perTest: PerTestBlock,
+    val warnings: List<Reason>,
+    val targets: List<String>,
+    val ranAtMs: Long,
+)
+
+/** Plain Gson reflection serialization is fine here (unlike the read path's D-40-driven manual parsing) - this writes our own already-validated Kotlin objects, never untrusted external input. */
+fun writePerTestSnapshotJson(snapshot: PerTestSnapshot): String = Gson().toJson(snapshot)
+
+fun parsePerTestSnapshot(raw: String): PerTestSnapshot? {
+    val root: JsonElement = try {
+        JsonParser.parseString(raw)
+    } catch (e: JsonSyntaxException) {
+        return null
+    }
+    val obj = root.asObjectOrNull() ?: return null
+    val perTest = parsePerTestBlock(obj.obj("perTest")) ?: return null
+    val warnings = (obj.array("warnings") ?: return null).map { parseReason(it.asObjectOrNull()) ?: return null }
+    val targets = (obj.array("targets") ?: return null).map { it.asStringOrNull() ?: return null }
+    val ranAtMs = obj.longOrNull("ranAtMs") ?: return null
+    return PerTestSnapshot(perTest, warnings, targets, ranAtMs)
 }

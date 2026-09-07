@@ -20,6 +20,9 @@ import dev.proofjava.intellij.core.model.coverageStateFrom
 import dev.proofjava.intellij.core.state.CoverageStateService
 import dev.proofjava.intellij.core.state.PerTestStateService
 import dev.proofjava.intellij.core.ui.gutter.applyGutterCoverage
+import dev.proofjava.intellij.core.util.proofStorageFile
+import dev.proofjava.intellij.core.verdict.PerTestSnapshot
+import dev.proofjava.intellij.core.verdict.writePerTestSnapshotJson
 
 private const val DEFAULT_PER_TEST_TIMEOUT_SECONDS = 120
 
@@ -140,14 +143,34 @@ private fun runDeepScanCore(project: Project, indicator: ProgressIndicator, modu
     )
     val document = runAnalyzeCore(project, indicator, engine, cli, repo, perTest) ?: return
 
+    val perTestBlock = document.perTest
+    val targetFqcns = targets.map { it.fqcn }
+    val ranAt = System.currentTimeMillis()
+    // Best-effort, same as proof-vscode's own writeJsonSnapshot: a failed
+    // write does not fail the scan itself - the result is already
+    // published in memory, only a later window reload would lose it.
+    // Written on this background thread (already off the EDT, same
+    // Task.Backgroundable contract every action here follows), not
+    // inside the invokeLater below - no reason to make the UI thread
+    // wait on disk I/O.
+    if (perTestBlock != null) {
+        runCatching {
+            proofStorageFile(repo, "pertest-current.json")
+                .writeText(writePerTestSnapshotJson(PerTestSnapshot(perTestBlock, document.warnings, targetFqcns, ranAt)))
+        }
+    }
+
     ApplicationManager.getApplication().invokeLater {
         val coverageState = coverageStateFrom(repo, document)
         CoverageStateService.getInstance(project).publish(coverageState)
         coverageState.fileCoverage?.let { applyGutterCoverage(project, repo, it) }
 
         PerTestStateService.getInstance(project).publish(
-            PerTestState(perTest = document.perTest, warnings = document.warnings, targets = targets.map { it.fqcn }, ranAt = System.currentTimeMillis()),
+            PerTestState(perTest = perTestBlock, warnings = document.warnings, targets = targetFqcns, ranAt = ranAt),
         )
+        if (perTestBlock == null) {
+            showWarningLater(project, "Proof: no per-test evidence for this run - see the Warnings section in the Coverage view for PER_TEST_* detail.")
+        }
     }
 }
 
