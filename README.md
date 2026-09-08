@@ -1,5 +1,8 @@
 # Proof for IntelliJ IDEA
 
+[![Version](https://img.shields.io/jetbrains/plugin/v/34152-proof.svg)](https://plugins.jetbrains.com/plugin/34152-proof)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/34152-proof.svg)](https://plugins.jetbrains.com/plugin/34152-proof)
+
 See which of your passing tests actually prove anything, right in the
 editor.
 
@@ -91,7 +94,7 @@ with a survivors-only filter.
 ## Installation
 
 Search for **Proof** in **Settings/Preferences → Plugins → Marketplace**,
-or install it from the JetBrains Marketplace listing once published.
+or install it from the [JetBrains Marketplace listing](https://plugins.jetbrains.com/plugin/34152-proof).
 
 To build it from source instead:
 
