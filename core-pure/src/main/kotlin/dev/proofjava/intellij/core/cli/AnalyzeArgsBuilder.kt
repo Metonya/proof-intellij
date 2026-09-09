@@ -17,6 +17,8 @@ package dev.proofjava.intellij.core.cli
  *     module. Takes priority over `reportPath`/`module` when both are given.
  */
 
+private const val REPORT_FLAG = "--report"
+
 sealed interface DiffMode {
     data object NoVcs : DiffMode
     data object Uncommitted : DiffMode
@@ -94,18 +96,22 @@ private fun appendDiffMode(args: MutableList<String>, diffMode: DiffMode) {
 }
 
 private fun appendReportBinding(args: MutableList<String>, input: AnalyzeArgsInput) {
-    if (input.modules.isNotEmpty()) {
-        for (m in input.modules) {
-            args += listOf("--module", "${m.id}=${m.root}")
+    when {
+        input.modules.isNotEmpty() -> {
+            for (m in input.modules) {
+                args += listOf("--module", "${m.id}=${m.root}")
+            }
+            for (m in input.modules) {
+                args += listOf(REPORT_FLAG, "${m.id}=${m.reportPath}")
+            }
         }
-        for (m in input.modules) {
-            args += listOf("--report", "${m.id}=${m.reportPath}")
+        input.module != null -> {
+            val (id, root) = input.module
+            args += listOf("--module", "$id=$root", REPORT_FLAG, "$id=${input.reportPath}")
         }
-    } else if (input.module != null) {
-        val (id, root) = input.module
-        args += listOf("--module", "$id=$root", "--report", "$id=${input.reportPath}")
-    } else if (input.reportPath != null) {
-        args += listOf("--report", input.reportPath)
+        input.reportPath != null -> {
+            args += listOf(REPORT_FLAG, input.reportPath)
+        }
     }
 }
 

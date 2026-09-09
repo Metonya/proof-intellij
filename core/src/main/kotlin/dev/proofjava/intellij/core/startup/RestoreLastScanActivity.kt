@@ -31,6 +31,8 @@ import java.io.File
  * successfully, `verdict-current.json`'s own (possibly absent or stale)
  * `perTest` block is not used to overwrite it.
  */
+private const val PROOF_DIR = ".proof"
+
 class RestoreLastScanActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
         val repo = project.basePath ?: return
@@ -42,7 +44,7 @@ class RestoreLastScanActivity : ProjectActivity {
 
 /** No `verdict-current.json` fallback, unlike [restorePerTestSnapshot] - `extension.ts`'s own `restoreLastCoverageFrom` has none either: a routine Quick Scan/Deep Scan's own verdict almost never carries a `mutation` block (a separate, opt-in, expensive step), so there is nothing useful to fall back to. */
 private fun restoreMutationSnapshot(project: Project, repo: String) {
-    val raw = runCatching { File(File(repo, ".proof"), "mutation-current.json").readText() }.getOrNull() ?: return
+    val raw = runCatching { File(File(repo, PROOF_DIR), "mutation-current.json").readText() }.getOrNull() ?: return
     val snapshot = parseMutationSnapshot(raw) ?: return
     ApplicationManager.getApplication().invokeLater {
         MutationStateService.getInstance(project).publish(
@@ -52,7 +54,7 @@ private fun restoreMutationSnapshot(project: Project, repo: String) {
 }
 
 private fun restorePerTestSnapshot(project: Project, repo: String): Boolean {
-    val raw = runCatching { File(File(repo, ".proof"), "pertest-current.json").readText() }.getOrNull()
+    val raw = runCatching { File(File(repo, PROOF_DIR), "pertest-current.json").readText() }.getOrNull()
         ?: return false // nothing saved yet - the normal first-run shape, not an error
     val snapshot = parsePerTestSnapshot(raw) ?: return false
     ApplicationManager.getApplication().invokeLater {
@@ -64,7 +66,7 @@ private fun restorePerTestSnapshot(project: Project, repo: String): Boolean {
 }
 
 private fun restoreVerdictSnapshot(project: Project, repo: String, perTestRestored: Boolean) {
-    val raw = runCatching { File(File(repo, ".proof"), "verdict-current.json").readText() }.getOrNull() ?: return
+    val raw = runCatching { File(File(repo, PROOF_DIR), "verdict-current.json").readText() }.getOrNull() ?: return
     val parsed = parseVerdict(raw)
     if (parsed !is ParseResult.Ok) return
     val document = parsed.value

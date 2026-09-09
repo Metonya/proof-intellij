@@ -4,6 +4,8 @@ import java.io.File
 
 enum class SkillScope { WORKSPACE, USER }
 
+private const val SKILL_DIR_NAME = "proof-java"
+
 data class SkillTarget(
     val id: String,
     val label: String,
@@ -35,32 +37,32 @@ val SKILL_TARGETS: List<SkillTarget> = listOf(
         scopes = listOf(SkillScope.WORKSPACE, SkillScope.USER),
         resolveDir = { scope, workspaceRoot ->
             if (scope == SkillScope.WORKSPACE) {
-                File(File(File(workspaceRoot, ".claude"), "skills"), "proof-java").path
+                File(File(File(workspaceRoot, ".claude"), "skills"), SKILL_DIR_NAME).path
             } else {
-                File(File(File(userHome(), ".claude"), "skills"), "proof-java").path
+                File(File(File(userHome(), ".claude"), "skills"), SKILL_DIR_NAME).path
             }
         },
     ),
     SkillTarget(
         id = "windsurf",
         label = "Windsurf",
-        description = ".windsurf/skills/proof-java (workspace)",
+        description = ".windsurf/skills/$SKILL_DIR_NAME (workspace)",
         scopes = listOf(SkillScope.WORKSPACE),
-        resolveDir = { _, workspaceRoot -> File(File(File(workspaceRoot, ".windsurf"), "skills"), "proof-java").path },
+        resolveDir = { _, workspaceRoot -> File(File(File(workspaceRoot, ".windsurf"), "skills"), SKILL_DIR_NAME).path },
     ),
     SkillTarget(
         id = "antigravity",
         label = "Antigravity",
-        description = "~/.gemini/antigravity-cli/skills/proof-java (user)",
+        description = "~/.gemini/antigravity-cli/skills/$SKILL_DIR_NAME (user)",
         scopes = listOf(SkillScope.USER),
-        resolveDir = { _, _ -> File(File(File(File(userHome(), ".gemini"), "antigravity-cli"), "skills"), "proof-java").path },
+        resolveDir = { _, _ -> File(File(File(File(userHome(), ".gemini"), "antigravity-cli"), "skills"), SKILL_DIR_NAME).path },
     ),
     SkillTarget(
         id = "portable",
         label = "Portable (.agents/skills)",
-        description = ".agents/skills/proof-java (workspace) - read directly by Cursor, Codex CLI, Gemini CLI, and GitHub Copilot",
+        description = ".agents/skills/$SKILL_DIR_NAME (workspace) - read directly by Cursor, Codex CLI, Gemini CLI, and GitHub Copilot",
         scopes = listOf(SkillScope.WORKSPACE),
-        resolveDir = { _, workspaceRoot -> File(File(File(workspaceRoot, ".agents"), "skills"), "proof-java").path },
+        resolveDir = { _, workspaceRoot -> File(File(File(workspaceRoot, ".agents"), "skills"), SKILL_DIR_NAME).path },
     ),
 )
 

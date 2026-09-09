@@ -38,9 +38,7 @@ fun fetchSkillFiles(
     val paths = entries.mapNotNull { it as? JsonObject }
         .filter { it.stringField("type") == "blob" && (it.stringField("path") ?: "").startsWith("$SKILL_ROOT/") }
         .mapNotNull { it.stringField("path") }
-    if (paths.isEmpty()) {
-        throw IllegalStateException("no files found under \"$SKILL_ROOT\" in $SKILL_REPO@$SKILL_BRANCH - the skill may have moved")
-    }
+    check(paths.isNotEmpty()) { "no files found under \"$SKILL_ROOT\" in $SKILL_REPO@$SKILL_BRANCH - the skill may have moved" }
 
     return paths.map { fullPath ->
         val relativePath = fullPath.removePrefix("$SKILL_ROOT/")

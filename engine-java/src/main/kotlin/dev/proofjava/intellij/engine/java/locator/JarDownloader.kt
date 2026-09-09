@@ -32,9 +32,7 @@ fun downloadLatestJar(
     val release = parseJsonObject(fetchText("https://api.github.com/repos/$JAR_REPO/releases/latest"))
     val tagName = release.stringField("tag_name")
     val assets = release.arrayField("assets")
-    if (tagName == null || assets == null) {
-        throw IllegalStateException("unexpected response shape from the GitHub API (no tag_name/assets)")
-    }
+    check(tagName != null && assets != null) { "unexpected response shape from the GitHub API (no tag_name/assets)" }
 
     val jarAsset = assets.mapNotNull { it as? com.google.gson.JsonObject }
         .firstOrNull { it.stringField("name") == JAR_ASSET_NAME }
@@ -54,11 +52,11 @@ fun downloadLatestJar(
         // verify against, same as the TS source.
         if (expected != null) {
             val actual = sha256Hex(content)
-            if (!actual.equals(expected, ignoreCase = true)) {
-                throw IllegalStateException(
-                    "downloaded \"$JAR_ASSET_NAME\" does not match its published SHA-256 checksum " +
-                        "(expected $expected, got $actual) - the download may be corrupted or tampered with",
-                )
+            // kotlin:S6519 does not apply here: "==" drops the ignoreCase
+            // argument and would make this check case-sensitive again.
+            check(actual.equals(expected, ignoreCase = true)) {
+                "downloaded \"$JAR_ASSET_NAME\" does not match its published SHA-256 checksum " +
+                    "(expected $expected, got $actual) - the download may be corrupted or tampered with"
             }
         }
     }

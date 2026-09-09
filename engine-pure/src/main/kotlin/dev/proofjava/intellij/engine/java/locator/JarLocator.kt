@@ -2,6 +2,8 @@ package dev.proofjava.intellij.engine.java.locator
 
 import java.io.File
 
+private const val JAR_FILE_NAME = "proof-java.jar"
+
 /**
  * Port of `proof-vscode/src/cli/jarLocator.ts`'s search order:
  * [configuredPath] first (accepted now so this function's signature does
@@ -23,14 +25,14 @@ fun locateJar(projectRoot: String, configuredPath: String? = null): String? {
 }
 
 /** Exported so a future "Download proof-java.jar" command can offer these exact two locations - whatever it writes to, [locateJar] above must find with zero extra config. */
-fun workspaceJarPath(projectRoot: String): String = File(File(projectRoot, ".proof-java"), "proof-java.jar").path
+fun workspaceJarPath(projectRoot: String): String = File(File(projectRoot, ".proof-java"), JAR_FILE_NAME).path
 
-fun userJarPath(): String = File(File(userHome(), ".proof-java"), "proof-java.jar").path
+fun userJarPath(): String = File(File(userHome(), ".proof-java"), JAR_FILE_NAME).path
 
 private fun userHome(): String = System.getProperty("user.home")
 
 private fun defaultCandidates(projectRoot: String): List<String> = listOf(
-    File(File(File(projectRoot, "proof-java-cli"), "target"), "proof-java.jar").path,
+    File(File(File(projectRoot, "proof-java-cli"), "target"), JAR_FILE_NAME).path,
     workspaceJarPath(projectRoot),
     userJarPath(),
 )

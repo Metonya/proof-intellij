@@ -20,14 +20,15 @@ import dev.proofjava.intellij.core.ui.gutter.clearGutterCoverage
 fun toggleCoverage(project: Project) {
     val service = CoverageStateService.getInstance(project)
     val state = service.state
-    if (state?.fileCoverage == null) {
+    val fileCoverage = state?.fileCoverage
+    if (state == null || fileCoverage == null) {
         Messages.showInfoMessage(project, "No coverage data yet - run Quick Scan first.", "Proof")
         return
     }
     val nextVisible = !service.gutterVisible
     service.setGutterVisible(nextVisible)
     if (nextVisible) {
-        applyGutterCoverage(project, state.projectRoot, state.fileCoverage)
+        applyGutterCoverage(project, state.projectRoot, fileCoverage)
     } else {
         clearGutterCoverage(project)
     }

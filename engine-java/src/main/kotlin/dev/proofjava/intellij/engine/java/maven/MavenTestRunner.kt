@@ -32,19 +32,17 @@ private data class ReactorPomFacts(val hasJacocoPlugin: Boolean, val literalArgL
 private data class LiteralArgLineLocation(val file: String, val line: Int, val text: String)
 
 private fun scanPoms(projectRoot: String): ReactorPomFacts {
-    var hasJacocoPlugin = false
-    var literalArgLine: LiteralArgLineLocation? = null
-    for (relativePath in findPomFiles(projectRoot)) {
+    val perPomFacts = findPomFiles(projectRoot).mapNotNull { relativePath ->
         val xml = try {
             File(projectRoot, relativePath).readText()
         } catch (e: Exception) {
-            continue
+            return@mapNotNull null
         }
-        val facts = inspectPom(xml)
-        hasJacocoPlugin = hasJacocoPlugin || facts.hasJacocoPlugin
-        if (facts.literalArgLine != null && literalArgLine == null) {
-            literalArgLine = LiteralArgLineLocation(relativePath, facts.literalArgLine.line, facts.literalArgLine.text)
-        }
+        relativePath to inspectPom(xml)
+    }
+    val hasJacocoPlugin = perPomFacts.any { (_, facts) -> facts.hasJacocoPlugin }
+    val literalArgLine = perPomFacts.firstNotNullOfOrNull { (relativePath, facts) ->
+        facts.literalArgLine?.let { LiteralArgLineLocation(relativePath, it.line, it.text) }
     }
     return ReactorPomFacts(hasJacocoPlugin, literalArgLine)
 }

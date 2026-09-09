@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij.platform.module")
+    jacoco
 }
 
 // core = the language/build-tool-agnostic layer: verdict-JSON parsing,
@@ -20,6 +21,7 @@ plugins {
 // have zero `com.intellij.*` imports and must stay testable with plain
 // JUnit alone, no IntelliJ Platform test fixture needed.
 dependencies {
+    api(project(":core-pure"))
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -33,4 +35,20 @@ kotlin {
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    // The IntelliJ Platform Gradle plugin runs tests against instrumented
+    // (NotNull-checked) bytecode under build/instrumented/instrumentCode,
+    // not the plain build/classes/kotlin/main jacocoTestReport defaults to -
+    // those two class files have different CRCs, so the real coverage data
+    // in test.exec never matches anything there and every line shows as
+    // missed. Point at the instrumented classes actually executed instead.
+    classDirectories.setFrom(layout.buildDirectory.dir("instrumented/instrumentCode"))
+    reports {
+        xml.required.set(true)
+        html.required.set(false)
+    }
 }

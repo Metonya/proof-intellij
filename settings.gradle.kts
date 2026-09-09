@@ -38,5 +38,7 @@ dependencyResolutionManagement {
 // apply the lighter `org.jetbrains.intellij.platform.module` plugin instead.
 // This is the JetBrains-documented multi-module pattern for the 2.x Gradle
 // plugin: the *root* module IS the plugin, not a separate leaf module.
+include(":core-pure")
 include(":core")
+include(":engine-pure")
 include(":engine-java")
