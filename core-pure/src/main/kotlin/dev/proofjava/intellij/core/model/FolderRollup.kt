@@ -13,7 +13,8 @@ import dev.proofjava.intellij.core.verdict.MetricSet
  */
 
 /** One of the three metric modes a badge/status-bar/gutter can be driven from. */
-enum class BadgeMetric { JACOCO_LINE, STRICT_LINE, SONAR_COMPATIBLE }
+/** ENGINE_LINE is whichever engine-named first mode the document carries (proof-java D-99). */
+enum class BadgeMetric { ENGINE_LINE, STRICT_LINE, SONAR_COMPATIBLE }
 
 data class FolderRollup(val numerator: Long, val denominator: Long, val percent: Double?)
 
@@ -32,7 +33,7 @@ fun rollupFolder(files: List<FileCoverageEntry>, metric: BadgeMetric): FolderRol
 }
 
 fun MetricSet.forBadgeMetric(metric: BadgeMetric): Metric = when (metric) {
-    BadgeMetric.JACOCO_LINE -> jacocoLine
+    BadgeMetric.ENGINE_LINE -> engineLine
     BadgeMetric.STRICT_LINE -> strictLine
     BadgeMetric.SONAR_COMPATIBLE -> sonarCompatible
 }

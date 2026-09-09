@@ -27,8 +27,8 @@ class VerdictParserTest {
         if (percent == null) add("percent", JsonNull.INSTANCE) else addProperty("percent", percent)
     }
 
-    private fun metricSet(m: JsonObject = metric()): JsonObject = JsonObject().apply {
-        add("jacoco-line", m)
+    private fun metricSet(m: JsonObject = metric(), engineMode: String = "jacoco-line"): JsonObject = JsonObject().apply {
+        add(engineMode, m)
         add("strict-line", m)
         add("sonar-compatible", m)
     }
@@ -83,7 +83,7 @@ class VerdictParserTest {
     @Test
     fun `a real shaped document parses`() {
         val doc = okOrFail(minimalDocument())
-        assertEquals(50.0, doc.coverage.overall.jacocoLine.percent)
+        assertEquals(50.0, doc.coverage.overall.engineLine.percent)
     }
 
     @Test
@@ -104,7 +104,7 @@ class VerdictParserTest {
         val doc = minimalDocument()
         doc.getAsJsonObject("coverage").add("overall", metricSet(metric(denominator = 0, percent = null)))
         val parsed = okOrFail(doc)
-        assertNull(parsed.coverage.overall.jacocoLine.percent)
+        assertNull(parsed.coverage.overall.engineLine.percent)
     }
 
     @Test
@@ -372,7 +372,7 @@ class VerdictParserTest {
         val parsed = okOrFail(doc)
         val newCode = parsed.coverage.newCode
         check(newCode is NewCodeCoverage.Metrics) { "expected a real metricSet, not a status object" }
-        assertEquals(25.0, newCode.metricSet.jacocoLine.percent)
+        assertEquals(25.0, newCode.metricSet.engineLine.percent)
     }
 
     @Test
@@ -522,5 +522,27 @@ class VerdictParserTest {
     fun `never throws on a completely empty string either`() {
         val result = parseVerdict("")
         assertFalse(result is ParseResult.Ok)
+    }
+
+    @Test
+    fun `a proof-python verdict keeps its own engine mode id`() {
+        // The first mode is named after the engine whose counter it
+        // reproduces (proof-java D-99). Reading a sibling's document must not
+        // relabel it with this engine's name, and must not fail either.
+        val document = minimalDocument().apply {
+            add("tool", JsonObject().apply { addProperty("name", "proof-python"); addProperty("version", "0.1.0") })
+            add("coverage", JsonObject().apply {
+                add("overall", metricSet(engineMode = "coverage-line"))
+                add("newCode", JsonObject().apply { addProperty("status", "unavailable_no_vcs") })
+            })
+        }
+        val parsed = okOrFail(document)
+        assertEquals("coverage-line", parsed.coverage.overall.engineModeId)
+        assertEquals(1L, parsed.coverage.overall.engineLine.numerator)
+    }
+
+    @Test
+    fun `a proof-java verdict still reports jacoco-line`() {
+        assertEquals("jacoco-line", okOrFail(minimalDocument()).coverage.overall.engineModeId)
     }
 }

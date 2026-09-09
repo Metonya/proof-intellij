@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test
 class CoverageTreeTest {
 
     private fun metric(percent: Double? = 50.0) = Metric("num", 1, "den", 2, percent)
-    private fun metricSet() = MetricSet(metric(), metric(), metric())
+    private fun metricSet() = MetricSet(MetricSet.JACOCO_LINE, metric(), metric(), metric())
 
     private fun state(
         changedFiles: List<ChangedFile> = emptyList(),

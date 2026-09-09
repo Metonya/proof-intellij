@@ -156,10 +156,13 @@ private fun parseMetric(obj: JsonObject?): Metric? {
 
 private fun parseMetricSet(obj: JsonObject?): MetricSet? {
     if (obj == null) return null
-    val jacoco = parseMetric(obj.obj("jacoco-line")) ?: return null
+    // Either engine's spelling, and which one is remembered: render surfaces
+    // label the mode the document actually has (proof-java D-99).
+    val engineModeId = if (obj.obj(MetricSet.JACOCO_LINE) != null) MetricSet.JACOCO_LINE else MetricSet.COVERAGE_LINE
+    val engineLine = parseMetric(obj.obj(engineModeId)) ?: return null
     val strict = parseMetric(obj.obj("strict-line")) ?: return null
     val sonar = parseMetric(obj.obj("sonar-compatible")) ?: return null
-    return MetricSet(jacoco, strict, sonar)
+    return MetricSet(engineModeId, engineLine, strict, sonar)
 }
 
 private fun parseNewCodeCoverage(element: JsonElement?): NewCodeCoverage? {

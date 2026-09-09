@@ -62,7 +62,7 @@ class CoverageStatusBarWidget(private val project: Project) : StatusBarWidget, S
             "Proof - coverage view is $visibility (click to toggle)",
             "",
             "Overall (whole repo)",
-            metricLine("jacoco-line", state.overall.jacocoLine),
+            metricLine(state.overall.engineModeId, state.overall.engineLine),
             metricLine("strict-line", state.overall.strictLine),
             metricLine("sonar-compatible", state.overall.sonarCompatible),
             "",
@@ -78,7 +78,7 @@ class CoverageStatusBarWidget(private val project: Project) : StatusBarWidget, S
 private fun newCodeLines(newCode: NewCodeCoverage): String = when (newCode) {
     is NewCodeCoverage.Status -> if (newCode.status == "unavailable_no_vcs") "cannot be computed in no-vcs mode" else "an error occurred during the diff"
     is NewCodeCoverage.Metrics -> listOf(
-        metricLine("jacoco-line", newCode.metricSet.jacocoLine),
+        metricLine(newCode.metricSet.engineModeId, newCode.metricSet.engineLine),
         metricLine("strict-line", newCode.metricSet.strictLine),
         metricLine("sonar-compatible", newCode.metricSet.sonarCompatible),
     ).joinToString("\n")

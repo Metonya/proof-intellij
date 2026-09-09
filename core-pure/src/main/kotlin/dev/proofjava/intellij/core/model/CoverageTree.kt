@@ -78,7 +78,7 @@ private fun newCodeChildren(newCode: NewCodeCoverage, changedFiles: List<Changed
 }
 
 private fun metricNodes(set: MetricSet): List<CoverageNode> = listOf(
-    CoverageNode.MetricNode("jacoco-line", set.jacocoLine),
+    CoverageNode.MetricNode(set.engineModeId, set.engineLine),
     CoverageNode.MetricNode("strict-line", set.strictLine),
     CoverageNode.MetricNode("sonar-compatible", set.sonarCompatible),
 )
@@ -98,7 +98,8 @@ fun newCodeStatusText(status: String): String = when (status) {
 /** Same wording as `coverageView.ts`'s `metricTooltip` - based on `MetricsEngine.java`/D-04, not guessed. */
 fun metricTooltip(name: String): String = when (name) {
     "jacoco-line" -> "A line counts as covered if any instruction on it ran - the most generous number, identical to JaCoCo's own raw line coverage."
+    "coverage-line" -> "A statement counts as covered if it ran - identical to coverage.py's own statement percentage. proof-python's counterpart to jacoco-line."
     "strict-line" -> "A line only counts as covered if EVERY instruction on it ran - the strictest number, usually the lowest."
-    "sonar-compatible" -> "Adds branch coverage on top of JaCoCo line coverage - matches the percentage SonarQube shows within ±0.1, so it usually comes out lower than jacoco-line."
+    "sonar-compatible" -> "Adds branch coverage on top of the engine's own line coverage - matches the percentage SonarQube shows within ±0.1, so it usually comes out lower."
     else -> ""
 }
