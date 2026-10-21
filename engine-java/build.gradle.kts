@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -22,6 +23,8 @@ kotlin {
     jvmToolchain(25) // must match root's toolchain - IntelliJ Platform 2026.2.2 requires JDK 25
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_25)
+        // Without this, Kotlin emits bridge stubs for platform interfaces' default methods (ToolWindowFactory, StatusBarWidget, ...) which Plugin Verifier reports as overriding deprecated/experimental API.
+        jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
     }
 }
 
